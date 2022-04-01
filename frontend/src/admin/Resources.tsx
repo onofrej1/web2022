@@ -4,6 +4,7 @@ import { useParams } from "react-router-dom";
 import Form from "./Form";
 import resources from "../entities/index";
 import { Box, Typography } from "@material-ui/core";
+import useFetch from "use-http";
 
 const defaultState = {
   name: "posts",
@@ -43,6 +44,7 @@ const Resources = () => {
         return state;
     }
   }, defaultState);
+  
 
   /*const fetchResource = useMemo(async() => {
       const { request } = useAxios({
@@ -57,7 +59,6 @@ const Resources = () => {
     dispatch({ type: "setName", name: params.resource });
   }
 
-  console.log(state);
   // @ts-ignore
   const config = resources[resource];
 

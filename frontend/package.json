@@ -21,7 +21,8 @@
     "react-scripts": "latest",
     "react-table": "^7.7.0",
     "styled-components": "^5.3.3",
-    "typescript": "latest"
+    "typescript": "latest",
+    "use-http": "^1.0.26"
   },
   "scripts": {
     "start": "react-scripts start",

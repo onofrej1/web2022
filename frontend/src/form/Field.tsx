@@ -1,4 +1,5 @@
 import React, { FC } from "react";
+import Select from "./Select";
 import Text from "./Text";
 
 function Field (props: any) {
@@ -15,14 +16,19 @@ function Field (props: any) {
     const inputProps = {
         id: fieldId,
         label: label || props.name,
+        // inputType: text|email|color...
         required,
         ...rest,
     }
 
     const components: Record<string, FC> = {
        'text': Text, 
+       'select': Select,
+       'foreignKey': Select,
     };
+
     const Component: FC = components[type];
+    //console.log(inputProps);
 
     return (
         <div className="field mb-4 mt-4">

@@ -4,6 +4,7 @@ import Button from "@material-ui/core/Button";
 import Box from "@mui/material/Box";
 import { Grid } from "@material-ui/core";
 import { Typography } from "@mui/material";
+import useFetch from "use-http";
 
 interface FormProps {
   fields: any;
@@ -15,10 +16,8 @@ interface FormProps {
 const Form: FC<FormProps> = (props: any) => {
   const { fields, data = {}, handleSubmit, actions = [] } = props;
   const [form, setForm] = useState(data);
-
-  const updateValue = useCallback(
-    (name) => {
-      // console.log('update value '+name);
+  //const updateValue = //useCallback(
+  const updateValue = (name: string) => {
       return (value: any) => {
         console.log("update value:" + name + ":" + value);
         setForm({
@@ -26,13 +25,15 @@ const Form: FC<FormProps> = (props: any) => {
           [name]: value,
         });
       };
-    },
-    [setForm, form]
-  );
+    };
+    //[setForm, form]
+  //);
 
   const submit = (e: any) => {
     e.preventDefault();
   };
+
+  //useEffect(() => { initializeTodos() }, [])
   console.log(form);
 
   return (
@@ -41,7 +42,8 @@ const Form: FC<FormProps> = (props: any) => {
         {fields.map((field: any) => {
           const fieldName: string = field.name;
           //@ts-ignore
-          const value = form[fieldName];
+          let value = form[fieldName] || '';
+          
           return (
             <Box mb={2}>
               <Field
