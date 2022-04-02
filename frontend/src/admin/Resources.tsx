@@ -34,12 +34,6 @@ const Resources = () => {
           page: "form",
           rowId: action.rowId,
         };
-      /*case "editResource":
-        return {
-          ...state,
-          action: "edit",
-          rowId: action.rowId,
-        };*/
       default:
         return state;
     }
@@ -48,7 +42,6 @@ const Resources = () => {
   if (resource && state.name !== params.resource) {
     dispatch({ type: "setName", name: params.resource });
   }
-
   // @ts-ignore
   const config = resources[resource];
 

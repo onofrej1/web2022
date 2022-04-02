@@ -1,12 +1,12 @@
 import { Box, Button } from "@material-ui/core";
-import useAxios from "../useAxios";
 import Form from "../form/Form";
 import { FC, useEffect, useState } from "react";
 import resources from "../entities/index";
 import useFetch from "use-http";
-import CheckIcon from '@mui/icons-material/Check';
 import SaveIcon from '@mui/icons-material/Save';
 import CancelIcon from '@mui/icons-material/Cancel';
+import settings from './settings';
+import { getValue } from "./utils";
 
 interface AdminFormProps {
   resource: {
@@ -17,19 +17,14 @@ interface AdminFormProps {
   dispatch: Function;
 }
 
-function isObject(obj: any) {
-  return obj === Object(obj);
-}
-const pkField = "pk";
-
 export default function AdminForm({ resource, dispatch }: AdminFormProps) {
-  const { get, post, patch, loading, error } = useFetch("http://localhost:8000/api");
+  const { get, post, patch, loading, error } = useFetch(settings.baseUrl);
   const [fields, setFields] = useState([] as any[]);
   const [data, setData] = useState();
 
   // @ts-ignore
   const config = resources[resource.name];
-  const fieldsCfg: any[] = config.form;
+  const formConfig: any[] = config.form;
 
   useEffect(() => {
     async function getData() {
@@ -37,42 +32,32 @@ export default function AdminForm({ resource, dispatch }: AdminFormProps) {
       const data = await get(url);
 
       Object.keys(data).forEach((key: string) => {
-        let value = data[key];
-        if (Array.isArray(value) && value.length && isObject(value[0])) {
-          value = value.map((v: any) => v[pkField]);
-        }
-        if (!Array.isArray(value) && isObject(value)) {
-          value = value[pkField];
-        }
-        data[key] = value;
+        data[key] = getValue(data[key]);
       });
-
       setData(data);
     }
-    async function getFk() {
-      for (const field of fieldsCfg) {
+    async function getOptions() {
+      for (const field of formConfig) {
         if (
           ["foreignKey", "many2many"].includes(field.type) &&
           field.resource
         ) {
           let options = await get("/" + field.resource);
-          // @ts-ignore
-          options = options.map(
-            // @ts-ignore
-            ({ [field.text]: text, [field.value]: value }) => ({ text, value })
-          );
+          options = options.map((option: any) => {
+            const text = field.textRender ? field.textRender(option) : option[field.text];
+            const value = option[field.value];
+            return { text, value };
+          });
           field.options = options;
         }
       }
-      setFields(fieldsCfg);
+      setFields(formConfig);
     }
     getData();
-    getFk();
+    getOptions();
   }, []);
 
   const handleSubmit = async(data: any, e: any) => {
-    console.log(data);
-    console.log(e);
     const button = e.target.parentNode;
     if (button.id === 'cancel') {
       dispatch({ type: "showList" });
@@ -90,9 +75,6 @@ export default function AdminForm({ resource, dispatch }: AdminFormProps) {
       const url = `/${resource.name}`;
       post(url, data);
     }
-  };
-  const saveAndClose = () => {
-    dispatch({ type: "list" });
   };
  
   const Actions = [

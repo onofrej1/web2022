@@ -10,6 +10,8 @@ import useAxios from "../useAxios";
 import PropTypes from "prop-types";
 import { Button } from "@mui/material";
 import { Box } from "@material-ui/core";
+import settings from './settings';
+import useFetch from "use-http";
 
 const configKeys: any = {
   header: "Header",
@@ -35,12 +37,9 @@ const getTableColumns = (resource: string) => {
   fields.forEach((list: any) => {
     list = mapConfig(list);
     const { name, type } = list;
-    const col: any = {
-      Header: name,
-      accessor: name,
-    };
+    let accessor: any = name;
     if (type === "many2many") {
-      col.accessor = (data: any) => {
+      accessor = (data: any) => {
         const values = data[name];
         return values
           ? values.map((item: any) => item[list.show]).join(", ")
@@ -48,10 +47,15 @@ const getTableColumns = (resource: string) => {
       };
     }
     if (type === "foreignKey") {
-      col.accessor = (data: any) => {
-        return data[list.show];
+      accessor = (data: any) => {
+        return data[name] ? data[name][list.show] : null;
       };
     }
+    accessor = list.accessor ? list.accessor : accessor;
+    const col: any = {
+      Header: name,
+      accessor,
+    };
     columns.push(col);
   });
   return columns;
@@ -70,24 +74,20 @@ const List: FC<ListProps> = ({ resource, dispatch }) => {
   const tableColumns = getTableColumns(resourceName);
   const columnsStr = JSON.stringify(tableColumns);
   const columns: any = React.useMemo(() => tableColumns, [columnsStr]);
+  // @ts-ignore
+  const config = resources[resourceName];
 
-  const {
-    data = [],
-    loading,
-    error,
-  } = useAxios({
-    method: "get",
-    url: "/" + resourceName,
-  });
+  const url = `${settings.baseUrl}/${resourceName}`;
+  const { data = [], loading, error } = useFetch(url, []);
 
-  const add = () => {
+  const addItem = () => {
     dispatch({ type: 'showForm' });
   };
 
-  const edit = (rowId: number | string) => {
+  const editItem = (row: any) => {
+    const rowId = row.original[settings.primaryKey];
     dispatch({ type: "showForm", rowId });
   };
-
   const {
     getTableProps,
     headerGroups,
@@ -96,15 +96,14 @@ const List: FC<ListProps> = ({ resource, dispatch }) => {
     // getTableBodyProps,
   } = useTable({ columns, data });
 
-
   if (loading) return <div>loading...</div>;
   if (error) return <div>{error}</div>;
 
   return (
     <div>
       <Box m={2}>
-        <Button variant="contained" onClick={add} color="primary">
-          Add new {resourceName}
+        <Button variant="contained" onClick={addItem} color="primary">
+          Add new {config.name}
         </Button>
       </Box>
       <MaUTable {...getTableProps()}>
@@ -121,6 +120,7 @@ const List: FC<ListProps> = ({ resource, dispatch }) => {
         </TableHead>
         <TableBody>
           {rows.map((row, i) => {
+            console.log(row);
             prepareRow(row);
             return (
               <TableRow {...row.getRowProps()}>
@@ -132,7 +132,7 @@ const List: FC<ListProps> = ({ resource, dispatch }) => {
                   );
                 })}
                 <TableCell>
-                  <Button onClick={() => edit(row.id)}>Edit</Button>
+                  <Button onClick={() => editItem(row)}>Edit</Button>
                 </TableCell>
               </TableRow>
             );

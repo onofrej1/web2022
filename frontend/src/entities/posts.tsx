@@ -1,5 +1,6 @@
 export default {
   name: "Post",
+  menuIcon: 'saveIcon',
   resource: "posts",
   filter: [
     { name: "title", type: "select", op: "eq", label: "Title" },
@@ -12,7 +13,11 @@ export default {
       type: "foreignKey",
       resource: "users",
       value: 'pk',
-      text: "last_name",
+      //text: "last_name",
+      textRender: (author: any) => {
+        if (!author) return "";
+        return author.first_name + " " + author.last_name;
+      }
     },
     {
       name: "tags",
@@ -27,23 +32,22 @@ export default {
   list: [
     { name: "title", custom: "custom" },
     { name: "text" },
-    { name: "email" },
     {
       name: "author",
       type: "foreignKey",
-      show: "last_name",
-      renderx: ({ author }: any) => {
+      //show: "last_name",
+      render: ({ author }: any) => {
         if (!author) return "";
-        return author.first_name + " x" + author.last_name;
+        return author.first_name + " " + author.last_name;
       },
     },
     {
       name: "tags",
       type: "many2many",
       show: "name",
-      renderx: ({ tags }: any) => {
+      /*render: ({ tags }: any) => {
         return tags.map((tag: any) => tag.name).join(", ");
-      },
+      },*/
     },
   ],
   //footer: footer2,

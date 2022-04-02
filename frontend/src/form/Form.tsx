@@ -15,18 +15,19 @@ interface FormProps {
 const Form: FC<FormProps> = (props: any) => {
   const { fields, actions = [], data: defaultData = {}, handleSubmit } = props;
   const [data, setData] = useState(defaultData);
-  //const updateValue = //useCallback(
-  const updateValue = (name: string) => {
+
+  const updateValue = useCallback(
+    (name: string) => {
       return (value: any) => {
-        console.log("update value:" + name + ":" + value);
+        //console.log("update value:" + name + ":" + value);
         setData({
           ...data,
           [name]: value,
         });
       };
-    };
-    //[setForm, form]
-  //);
+    },
+    [setData, data]
+  );
 
   const submit = (e: any) => {
     handleSubmit(data);
@@ -45,8 +46,7 @@ const Form: FC<FormProps> = (props: any) => {
       <form>
         {fields.map((field: any) => {
           const fieldName: string = field.name;
-          //@ts-ignore
-          const value = form[fieldName] || '';
+          const value = data[fieldName] || '';
           
           return (
             <Box mb={2}>
@@ -76,9 +76,8 @@ const Form: FC<FormProps> = (props: any) => {
           )}
         </Grid>
       </form>
-      <p>
-        <code>{JSON.stringify(data, null, 4)}</code>
-      </p>
+      
+      <code>{JSON.stringify(data, null, 4)}</code>
     </Box>
   );
 };
