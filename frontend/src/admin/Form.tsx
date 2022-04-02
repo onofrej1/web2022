@@ -1,4 +1,3 @@
-import { Box, Button } from "@material-ui/core";
 import Form from "../form/Form";
 import { FC, useEffect, useState } from "react";
 import resources from "../entities/index";
@@ -7,6 +6,7 @@ import SaveIcon from '@mui/icons-material/Save';
 import CancelIcon from '@mui/icons-material/Cancel';
 import settings from './settings';
 import { getValue } from "./utils";
+import { Box, Button } from "@mui/material";
 
 interface AdminFormProps {
   resource: {
@@ -58,7 +58,10 @@ export default function AdminForm({ resource, dispatch }: AdminFormProps) {
   }, []);
 
   const handleSubmit = async(data: any, e: any) => {
-    const button = e.target.parentNode;
+    console.log('submit');
+    const button = e.target;
+    console.log(e.target);
+
     if (button.id === 'cancel') {
       dispatch({ type: "showList" });
       return;

@@ -1,15 +1,9 @@
-import MaUTable from "@material-ui/core/Table";
-import TableBody from "@material-ui/core/TableBody";
-import TableCell from "@material-ui/core/TableCell";
-import TableHead from "@material-ui/core/TableHead";
-import TableRow from "@material-ui/core/TableRow";
 import React, { FC } from "react";
 import resources from "../entities/index";
 import { useTable } from "react-table";
 import useAxios from "../useAxios";
 import PropTypes from "prop-types";
-import { Button } from "@mui/material";
-import { Box } from "@material-ui/core";
+import { Box, Table, Button, TableBody, TableCell, TableHead, TableRow } from "@mui/material";
 import settings from './settings';
 import useFetch from "use-http";
 
@@ -78,7 +72,7 @@ const List: FC<ListProps> = ({ resource, dispatch }) => {
   const config = resources[resourceName];
 
   const url = `${settings.baseUrl}/${resourceName}`;
-  const { data = [], loading, error } = useFetch(url, []);
+  const { data = [], loading, error } = useFetch(url, [url]);
 
   const addItem = () => {
     dispatch({ type: 'showForm' });
@@ -106,7 +100,7 @@ const List: FC<ListProps> = ({ resource, dispatch }) => {
           Add new {config.name}
         </Button>
       </Box>
-      <MaUTable {...getTableProps()}>
+      <Table {...getTableProps()}>
         <TableHead>
           {headerGroups.map((headerGroup) => (
             <TableRow {...headerGroup.getHeaderGroupProps()}>
@@ -120,7 +114,6 @@ const List: FC<ListProps> = ({ resource, dispatch }) => {
         </TableHead>
         <TableBody>
           {rows.map((row, i) => {
-            console.log(row);
             prepareRow(row);
             return (
               <TableRow {...row.getRowProps()}>
@@ -138,7 +131,7 @@ const List: FC<ListProps> = ({ resource, dispatch }) => {
             );
           })}
         </TableBody>
-      </MaUTable>
+      </Table>
     </div>
   );
 };

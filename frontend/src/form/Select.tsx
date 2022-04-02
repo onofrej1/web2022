@@ -1,22 +1,15 @@
 import React, {useCallback} from "react";
-import { makeStyles } from '@material-ui/core/styles';
 import useAxios from "../useAxios";
 import useFetch from 'use-http';
 import { FormControl, InputLabel, MenuItem, Select } from "@mui/material";
 
-const useStyles = makeStyles((theme) => ({
-    formControl: {
-        minWidth: 120,
-        width: '100%'
-    },
-    /* selectEmpty: {
-        marginTop: theme.spacing(2),
-    }, */
-}));
+const formControl = {
+    minWidth: 120,
+    width: '100%',
+};
 
 function SelectFC(props: any) {
     const { onChange, value, options = [], label, ...rest } = props;
-    const classes = useStyles();
 
     const handleChange = (event: any) => {
         console.log(event.target.value);
@@ -25,7 +18,7 @@ function SelectFC(props: any) {
     console.log(value);
       
     return (
-        <FormControl className={classes.formControl}>
+        <FormControl sx={formControl}>
             <InputLabel>{label}</InputLabel>
             <Select
                 size="small"

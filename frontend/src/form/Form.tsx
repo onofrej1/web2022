@@ -1,9 +1,7 @@
 import React, { useState, useCallback, FC } from "react";
 import Field from "./Field";
-import Button from "@material-ui/core/Button";
 import Box from "@mui/material/Box";
-import { Grid } from "@material-ui/core";
-import { Typography } from "@mui/material";
+import { Button, Grid, Typography } from "@mui/material";
 
 interface FormProps {
   fields: any;
@@ -59,7 +57,7 @@ const Form: FC<FormProps> = (props: any) => {
             </Box>
           );
         })}
-        <Grid container justify="flex-end">
+        <Grid container>
           {actions.length ? (
             actions.map((action: any) => (
               <>

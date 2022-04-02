@@ -15,7 +15,7 @@ const menuIcons: any = {
   saveIcon: SaveIcon,
 }
 
-const cloneMenuItem = (el: any) => React.cloneElement(el, {
+const addMenuItemProps = (el: React.ReactElement<any>) => React.cloneElement(el, {
   fontSize: 'small',
 });
 
@@ -23,12 +23,13 @@ export default function Menu() {
   const items = Object.keys(resources).map((resourceKey: any) => {
     // @ts-ignore
     const resource: any = resources[resourceKey];
-    console.log(resource);
-    const icon = menuIcons[resource.menuIcon] ? menuIcons[resource.menuIcon] : ContentCut;
+    const Icon = menuIcons[resource.menuIcon] ? menuIcons[resource.menuIcon] : ContentCut;
+    //const MenuIcon = addMenuItemProps(Icon);
+    //console.log(MenuIcon);
     const menuItem = {
       resource: resource.resource,
       title: resource.name,
-      icon: cloneMenuItem(icon),
+      icon: <Icon />,
     };
     return menuItem;
   });

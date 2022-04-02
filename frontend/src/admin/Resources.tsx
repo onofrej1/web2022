@@ -3,7 +3,7 @@ import { useReducer } from "react";
 import { useParams } from "react-router-dom";
 import Form from "./Form";
 import resources from "../entities/index";
-import { Box, Typography } from "@material-ui/core";
+import { Box, Typography } from "@mui/material";
 
 const defaultState = {
   name: "posts",
