@@ -4,7 +4,6 @@ import Button from "@material-ui/core/Button";
 import Box from "@mui/material/Box";
 import { Grid } from "@material-ui/core";
 import { Typography } from "@mui/material";
-import useFetch from "use-http";
 
 interface FormProps {
   fields: any;
@@ -13,16 +12,15 @@ interface FormProps {
   data?: any;
 }
 
-
 const Form: FC<FormProps> = (props: any) => {
-  const { fields, data = {}, handleSubmit, actions = [] } = props;
-  const [form, setForm] = useState(data);
+  const { fields, actions = [], data: defaultData = {}, handleSubmit } = props;
+  const [data, setData] = useState(defaultData);
   //const updateValue = //useCallback(
   const updateValue = (name: string) => {
       return (value: any) => {
         console.log("update value:" + name + ":" + value);
-        setForm({
-          ...form,
+        setData({
+          ...data,
           [name]: value,
         });
       };
@@ -31,25 +29,20 @@ const Form: FC<FormProps> = (props: any) => {
   //);
 
   const submit = (e: any) => {
-    e.preventDefault();
+    handleSubmit(data);
   };
 
-  const onSave = (e: any) => {
-    handleSubmit(form);
-  };
-
-  console.log(form);
   const clone = (el: any) => React.cloneElement(el, {
     onClick: (e: any) => {
       if (handleSubmit) {
-        handleSubmit(form, e);
+        handleSubmit(data, e);
       }
     }
   });
 
   return (
     <Box p={2}>
-      <form onSubmit={submit}>
+      <form>
         {fields.map((field: any) => {
           const fieldName: string = field.name;
           //@ts-ignore
@@ -76,7 +69,7 @@ const Form: FC<FormProps> = (props: any) => {
             ))
           ) : (
             <>
-              <Button variant="contained" onClick={onSave} color="primary">
+              <Button variant="contained" onClick={submit} color="primary">
                 Save
               </Button>
             </>
@@ -84,7 +77,7 @@ const Form: FC<FormProps> = (props: any) => {
         </Grid>
       </form>
       <p>
-        <code>{JSON.stringify(form, null, 4)}</code>
+        <code>{JSON.stringify(data, null, 4)}</code>
       </p>
     </Box>
   );

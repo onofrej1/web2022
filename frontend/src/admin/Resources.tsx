@@ -4,11 +4,10 @@ import { useParams } from "react-router-dom";
 import Form from "./Form";
 import resources from "../entities/index";
 import { Box, Typography } from "@material-ui/core";
-import useFetch from "use-http";
 
 const defaultState = {
   name: "posts",
-  action: "list",
+  page: "list",
   rowId: null,
   data: null,
 };
@@ -24,36 +23,27 @@ const Resources = () => {
           ...state,
           name: action.name,
         };
-      case "add":
+      case "showList":
         return {
           ...state,
-          action: action.name,
+          page: "list",
         };
-      case "edit":
+      case "showForm":
+        return {
+          ...state,
+          page: "form",
+          rowId: action.rowId,
+        };
+      /*case "editResource":
         return {
           ...state,
           action: "edit",
           rowId: action.rowId,
-        };
-      /*case "setData":
-        return {
-          ...state,
-          data: action.data,
         };*/
       default:
         return state;
     }
   }, defaultState);
-  
-
-  /*const fetchResource = useMemo(async() => {
-      const { request } = useAxios({
-        method: "get",
-        url: "/" + state.name +"/"+state.rowId,
-      });
-      const data = await request;
-      dispatch({ type: "setData", data });
-  }, [state.rowId]);*/
 
   if (resource && state.name !== params.resource) {
     dispatch({ type: "setName", name: params.resource });
@@ -64,7 +54,7 @@ const Resources = () => {
 
   return (
     <div>
-      {state.action === "list" && 
+      {state.page === "list" && 
       <>
         <Box m={2}>
           <Typography variant="h4" component="div">
@@ -73,7 +63,7 @@ const Resources = () => {
         </Box>
         <List resource={state} dispatch={dispatch} />
       </>}
-      {["add", "edit"].includes(state.action) && (
+      {state.page === "form" && 
         <>
           <Box m={2}>
             <Typography variant="h4" component="div">
@@ -83,7 +73,7 @@ const Resources = () => {
           </Box>
           <Form resource={state} dispatch={dispatch} />
         </>
-      )}
+      }
     </div>
   );
 };

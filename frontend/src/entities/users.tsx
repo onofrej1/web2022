@@ -1,5 +1,6 @@
 export default {
     name: 'Users',
+    resource: "users",
     filter: [
       { name: 'username', type: 'text', 'op': 'eq'}
     ],

@@ -4,6 +4,9 @@ import Form from "../form/Form";
 import { FC, useEffect, useState } from "react";
 import resources from "../entities/index";
 import useFetch from "use-http";
+import CheckIcon from '@mui/icons-material/Check';
+import SaveIcon from '@mui/icons-material/Save';
+import CancelIcon from '@mui/icons-material/Cancel';
 
 interface AdminFormProps {
   resource: {
@@ -20,7 +23,7 @@ function isObject(obj: any) {
 const pkField = "pk";
 
 export default function AdminForm({ resource, dispatch }: AdminFormProps) {
-  const { get, loading, error } = useFetch("http://localhost:8000/api");
+  const { get, post, patch, loading, error } = useFetch("http://localhost:8000/api");
   const [fields, setFields] = useState([] as any[]);
   const [data, setData] = useState();
 
@@ -67,18 +70,40 @@ export default function AdminForm({ resource, dispatch }: AdminFormProps) {
     getFk();
   }, []);
 
-  const save = (data: any, e: any) => {
+  const handleSubmit = async(data: any, e: any) => {
     console.log(data);
     console.log(e);
-  };
-  const saveAndClose = () => {};
+    const button = e.target.parentNode;
+    if (button.id === 'cancel') {
+      dispatch({ type: "showList" });
+      return;
+    }
 
+    if (button.id === 'save-and-close') {
+      dispatch({ type: "showList" });
+    }
+    return;
+    if (data.pk) {
+      const url = `/${resource.name}/${resource.rowId}/`;
+      patch(url, data);
+    } else {
+      const url = `/${resource.name}`;
+      post(url, data);
+    }
+  };
+  const saveAndClose = () => {
+    dispatch({ type: "list" });
+  };
+ 
   const Actions = [
+    <Button variant="contained" id="cancel" color="secondary">
+      <CancelIcon fontSize="small" /> Cancel
+    </Button>,
     <Button variant="contained" id="save" color="primary">
-      Save
+      <SaveIcon fontSize="small" /> Save
     </Button>,
     <Button variant="contained" id="save-and-close" color="primary">
-      Save and close
+      <SaveIcon fontSize="small" /> Save and close
     </Button>,
   ];
 
@@ -88,7 +113,7 @@ export default function AdminForm({ resource, dispatch }: AdminFormProps) {
   return (
     <Box p={2}>
       <Form
-        handleSubmit={save}
+        handleSubmit={handleSubmit}
         fields={fields}
         actions={Actions}
         data={data}

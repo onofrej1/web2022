@@ -6,20 +6,19 @@ import ListItemIcon from "@mui/material/ListItemIcon";
 import ContentCut from "@mui/icons-material/ContentCut";
 import ContentPaste from "@mui/icons-material/ContentPaste";
 import { Link } from "react-router-dom";
+import resources from "../entities/index";
 
 export default function Menu() {
-  const items = [
-    {
-      resource: "posts",
-      title: "Posts",
+  const items = Object.keys(resources).map((resourceKey: any) => {
+    // @ts-ignore
+    const resource: any = resources[resourceKey];
+    const menuItem = {
+      resource: resource.resource,
+      title: resource.name,
       icon: <ContentCut fontSize="small" />,
-    },
-    {
-      resource: "users",
-      title: "Users",
-      icon: <ContentPaste fontSize="small" />,
-    },
-  ];
+    };
+    return menuItem;
+  });
 
   return (
     <Paper sx={{ width: 220, height: "100vh" }}>

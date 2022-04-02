@@ -1,5 +1,6 @@
 export default {
   name: "Post",
+  resource: "posts",
   filter: [
     { name: "title", type: "select", op: "eq", label: "Title" },
     { name: "text", type: "text", op: "contains", label: "Text" },

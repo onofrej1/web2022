@@ -9,6 +9,7 @@ import { useTable } from "react-table";
 import useAxios from "../useAxios";
 import PropTypes from "prop-types";
 import { Button } from "@mui/material";
+import { Box } from "@material-ui/core";
 
 const configKeys: any = {
   header: "Header",
@@ -79,8 +80,12 @@ const List: FC<ListProps> = ({ resource, dispatch }) => {
     url: "/" + resourceName,
   });
 
+  const add = () => {
+    dispatch({ type: 'showForm' });
+  };
+
   const edit = (rowId: number | string) => {
-    dispatch({ type: "edit", rowId });
+    dispatch({ type: "showForm", rowId });
   };
 
   const {
@@ -91,11 +96,17 @@ const List: FC<ListProps> = ({ resource, dispatch }) => {
     // getTableBodyProps,
   } = useTable({ columns, data });
 
+
   if (loading) return <div>loading...</div>;
   if (error) return <div>{error}</div>;
 
   return (
     <div>
+      <Box m={2}>
+        <Button variant="contained" onClick={add} color="primary">
+          Add new {resourceName}
+        </Button>
+      </Box>
       <MaUTable {...getTableProps()}>
         <TableHead>
           {headerGroups.map((headerGroup) => (
