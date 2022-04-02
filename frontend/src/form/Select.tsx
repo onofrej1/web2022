@@ -19,6 +19,7 @@ function SelectFC(props: any) {
     const classes = useStyles();
 
     const handleChange = (event: any) => {
+        console.log(event.target.value);
         onChange(event.target.value)
     };
     console.log(value);

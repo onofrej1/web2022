@@ -14,8 +14,13 @@ interface AdminFormProps {
   dispatch: Function;
 }
 
+function isObject(obj: any) {
+  return obj === Object(obj);
+}
+const pkField = "pk";
+
 export default function AdminForm({ resource, dispatch }: AdminFormProps) {
-  const { get, loading, error } = useFetch('http://localhost:8000/api');
+  const { get, loading, error } = useFetch("http://localhost:8000/api");
   const [fields, setFields] = useState([] as any[]);
   const [data, setData] = useState();
 
@@ -25,17 +30,34 @@ export default function AdminForm({ resource, dispatch }: AdminFormProps) {
 
   useEffect(() => {
     async function getData() {
-      const url = "/"+resource.name + "/" + resource.rowId;
+      const url = `/${resource.name}/${resource.rowId}`;
       const data = await get(url);
-      
+
+      Object.keys(data).forEach((key: string) => {
+        let value = data[key];
+        if (Array.isArray(value) && value.length && isObject(value[0])) {
+          value = value.map((v: any) => v[pkField]);
+        }
+        if (!Array.isArray(value) && isObject(value)) {
+          value = value[pkField];
+        }
+        data[key] = value;
+      });
+
       setData(data);
     }
     async function getFk() {
       for (const field of fieldsCfg) {
-        if (['foreignKey', 'many2many'].includes(field.type) && field.resource) {
-          let options = await get('/'+ field.resource);
+        if (
+          ["foreignKey", "many2many"].includes(field.type) &&
+          field.resource
+        ) {
+          let options = await get("/" + field.resource);
           // @ts-ignore
-          options = options.map(({ [field.text]: text, [field.value]: value }) => ({ text, value }));
+          options = options.map(
+            // @ts-ignore
+            ({ [field.text]: text, [field.value]: value }) => ({ text, value })
+          );
           field.options = options;
         }
       }
@@ -43,21 +65,19 @@ export default function AdminForm({ resource, dispatch }: AdminFormProps) {
     }
     getData();
     getFk();
-    //getFk().then(getData);
-    //Promise.all([getData, getFk]);
- }, []);
+  }, []);
 
-
-  const save = () => {
-    console.log("save");
+  const save = (data: any, e: any) => {
+    console.log(data);
+    console.log(e);
   };
   const saveAndClose = () => {};
 
   const Actions = [
-    <Button variant="contained" onClick={save} color="primary">
+    <Button variant="contained" id="save" color="primary">
       Save
     </Button>,
-    <Button variant="contained" onClick={saveAndClose} color="primary">
+    <Button variant="contained" id="save-and-close" color="primary">
       Save and close
     </Button>,
   ];
@@ -67,7 +87,12 @@ export default function AdminForm({ resource, dispatch }: AdminFormProps) {
 
   return (
     <Box p={2}>
-      <Form fields={fields} actions={Actions} data={data}></Form>
+      <Form
+        handleSubmit={save}
+        fields={fields}
+        actions={Actions}
+        data={data}
+      ></Form>
     </Box>
   );
 }

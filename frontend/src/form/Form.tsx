@@ -8,10 +8,11 @@ import useFetch from "use-http";
 
 interface FormProps {
   fields: any;
-  handleSubmit?: () => void;
+  handleSubmit?: (data: any, e?: any) => void;
   actions?: Array<any>;
   data?: any;
 }
+
 
 const Form: FC<FormProps> = (props: any) => {
   const { fields, data = {}, handleSubmit, actions = [] } = props;
@@ -33,8 +34,18 @@ const Form: FC<FormProps> = (props: any) => {
     e.preventDefault();
   };
 
-  //useEffect(() => { initializeTodos() }, [])
+  const onSave = (e: any) => {
+    handleSubmit(form);
+  };
+
   console.log(form);
+  const clone = (el: any) => React.cloneElement(el, {
+    onClick: (e: any) => {
+      if (handleSubmit) {
+        handleSubmit(form, e);
+      }
+    }
+  });
 
   return (
     <Box p={2}>
@@ -42,7 +53,7 @@ const Form: FC<FormProps> = (props: any) => {
         {fields.map((field: any) => {
           const fieldName: string = field.name;
           //@ts-ignore
-          let value = form[fieldName] || '';
+          const value = form[fieldName] || '';
           
           return (
             <Box mb={2}>
@@ -59,13 +70,13 @@ const Form: FC<FormProps> = (props: any) => {
           {actions.length ? (
             actions.map((action: any) => (
               <>
-                {action}
+                {clone(action)}
                 &nbsp;
               </>
             ))
           ) : (
             <>
-              <Button variant="contained" onClick={handleSubmit} color="primary" type="submit">
+              <Button variant="contained" onClick={onSave} color="primary">
                 Save
               </Button>
             </>

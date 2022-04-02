@@ -13,13 +13,13 @@ export default {
       value: 'pk',
       text: "last_name",
     },
-    /*{
+    {
       name: "tags",
       type: "many2many",
       resource: "tags",
       value: 'pk',
       text: "name",
-    },*/
+    },
     { name: "text", type: "text" },
     //{ name: 'content', type: 'editor' },
   ],

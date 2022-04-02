@@ -13,6 +13,7 @@ function Field (props: any) {
         ...rest
     } = props
 
+    
     const inputProps = {
         id: fieldId,
         label: label || props.name,
@@ -20,11 +21,15 @@ function Field (props: any) {
         required,
         ...rest,
     }
+    if (type === 'many2many') {
+        inputProps.multiple = true;
+    }
 
     const components: Record<string, FC> = {
        'text': Text, 
        'select': Select,
        'foreignKey': Select,
+       'many2many': Select,
     };
 
     const Component: FC = components[type];
