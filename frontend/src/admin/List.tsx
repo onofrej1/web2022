@@ -1,11 +1,25 @@
-import React, { FC } from "react";
+import React, { FC, useState } from "react";
 import resources from "../entities/index";
 import { useTable } from "react-table";
 import useAxios from "../useAxios";
 import PropTypes from "prop-types";
-import { Box, Table, Button, TableBody, TableCell, TableHead, TableRow } from "@mui/material";
-import settings from './settings';
+import {
+  Box,
+  Table,
+  Button,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableRow,
+  Select,
+  Menu,
+  MenuItem,
+  TextField,
+  IconButton,
+} from "@mui/material";
+import settings from "./settings";
 import useFetch from "use-http";
+import ClearIcon from '@mui/icons-material/Clear';
 
 const configKeys: any = {
   header: "Header",
@@ -66,6 +80,7 @@ interface ListProps {
 const List: FC<ListProps> = ({ resource, dispatch }) => {
   const resourceName = resource.name;
   const tableColumns = getTableColumns(resourceName);
+  const [filters, setFilters] = useState([] as any[]);
   const columnsStr = JSON.stringify(tableColumns);
   const columns: any = React.useMemo(() => tableColumns, [columnsStr]);
   // @ts-ignore
@@ -74,21 +89,71 @@ const List: FC<ListProps> = ({ resource, dispatch }) => {
   const url = `${settings.baseUrl}/${resourceName}`;
   const { data = [], loading, error } = useFetch(url, [url]);
 
+  const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
+  const open = Boolean(anchorEl);
+
+  const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
+    setAnchorEl(event.currentTarget);
+  };
+  const addFilter = (filter: any) => {
+    setAnchorEl(null);
+    if (filter.type === 'select') {
+      filter.options = data.map((value: any) => {
+        const option = value[filter.name];
+        return { value: option, text: option };
+      });
+    }
+    filters.push(filter);
+    setFilters(filters);
+  };
+
+  const removeFilter = (filterName: string) => {
+    const newFilters = filters.filter((filter: any) => filter.name !== filterName);
+    setFilters(newFilters);
+  }
+
+  const handleFilterChange = (e: any) => {
+    console.log(e.target);
+    const filterName = e.target.name;
+    const filter = filters.find((f) => f.name === filterName);
+    filter.value = e.target.value;
+    setFilters([...filters]);
+  };
+
+  const handleClose = () => {
+    setAnchorEl(null);
+  };
+
   const addItem = () => {
-    dispatch({ type: 'showForm' });
+    dispatch({ type: "showForm" });
   };
 
   const editItem = (row: any) => {
     const rowId = row.original[settings.primaryKey];
     dispatch({ type: "showForm", rowId });
   };
+
+  const filteredData = data.filter((value: any) => {
+    let show = true;
+    filters.forEach((filter: any) => {
+      if (filter.value === '' || filter.value === undefined) return;
+      if (filter.op === 'eq') {
+        show = value[filter.name] === filter.value;
+      }
+      if (filter.op === 'contains') {
+        show = value[filter.name].includes(filter.value);
+      }
+    });
+    return show;
+  });
+
   const {
     getTableProps,
     headerGroups,
     rows,
     prepareRow,
     // getTableBodyProps,
-  } = useTable({ columns, data });
+  } = useTable({ columns, data: filteredData });
 
   if (loading) return <div>loading...</div>;
   if (error) return <div>{error}</div>;
@@ -100,6 +165,66 @@ const List: FC<ListProps> = ({ resource, dispatch }) => {
           Add new {config.name}
         </Button>
       </Box>
+      <Box alignItems={"end"}>
+        <Button
+          id="basic-button"
+          aria-controls={open ? "basic-menu" : undefined}
+          aria-haspopup="true"
+          aria-expanded={open ? "true" : undefined}
+          onClick={handleClick}
+        >
+          Filter
+        </Button>
+        <Menu
+          id="basic-menu"
+          anchorEl={anchorEl}
+          open={open}
+          onClose={handleClose}
+          MenuListProps={{
+            "aria-labelledby": "basic-button",
+          }}
+        >
+          {config.filter.map((filter: any) => {
+            return (
+              <MenuItem onClick={() => addFilter(filter)}>
+                {filter.name}
+              </MenuItem>
+            );
+          })}
+        </Menu>
+      </Box>
+      <Box>
+        {filters.map((filter: any) => {
+          return (
+            <>
+              {filter.type === "text" && (
+                <TextField
+                  name={filter.name}
+                  value={filter.value}
+                  onChange={handleFilterChange}
+                  size="small"
+                ></TextField>
+              )}
+              {filter.type === "select" && (
+                <Select
+                size="small"
+                name={filter.name}
+                value={filter.value}
+                onChange={handleFilterChange}
+                sx={{ minWidth: 120 }}
+            >
+                {filter.options.map((option: any) => <MenuItem key={option.value} value={option.value}>{option.text}</MenuItem>)}
+            </Select>
+              )}
+              <IconButton onClick={() => removeFilter(filter.name)}>
+                <ClearIcon />
+              </IconButton>
+            </>
+          );
+        })}
+      </Box>
+      <code>{JSON.stringify(filters, null, 4)}</code>
+
       <Table {...getTableProps()}>
         <TableHead>
           {headerGroups.map((headerGroup) => (
