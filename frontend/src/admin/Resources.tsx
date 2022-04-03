@@ -1,13 +1,13 @@
-import List from "./List";
-import { useReducer } from "react";
-import { useParams } from "react-router-dom";
-import Form from "./Form";
-import resources from "../entities/index";
-import { Box, Typography } from "@mui/material";
+import List from './List';
+import { useReducer } from 'react';
+import { useParams } from 'react-router-dom';
+import Form from './Form';
+import resources from '../entities/index';
+import { Box, Typography } from '@mui/material';
 
 const defaultState = {
-  name: "posts",
-  page: "list",
+  name: 'posts',
+  page: 'list',
   rowId: null,
   data: null,
 };
@@ -18,20 +18,20 @@ const Resources = () => {
 
   const [state, dispatch] = useReducer((state: any, action: any) => {
     switch (action.type) {
-      case "setName":
+      case 'setName':
         return {
           ...state,
           name: action.name,
         };
-      case "showList":
+      case 'showList':
         return {
           ...state,
-          page: "list",
+          page: 'list',
         };
-      case "showForm":
+      case 'showForm':
         return {
           ...state,
-          page: "form",
+          page: 'form',
           rowId: action.rowId,
         };
       default:
@@ -40,14 +40,14 @@ const Resources = () => {
   }, defaultState);
 
   if (resource && state.name !== params.resource) {
-    dispatch({ type: "setName", name: params.resource });
+    dispatch({ type: 'setName', name: params.resource });
   }
   // @ts-ignore
   const config = resources[resource];
 
   return (
     <div>
-      {state.page === "list" && 
+      {state.page === 'list' && 
       <>
         <Box m={2}>
           <Typography variant="h4" component="div">
@@ -56,11 +56,11 @@ const Resources = () => {
         </Box>
         <List resource={state} dispatch={dispatch} />
       </>}
-      {state.page === "form" && 
+      {state.page === 'form' && 
         <>
           <Box m={2}>
             <Typography variant="h4" component="div">
-              {state.action === "add" ? "Add new" : "Edit"}{" "}
+              {state.action === 'add' ? 'Add new' : 'Edit'}{' '}
               {config.name}
             </Typography>
           </Box>

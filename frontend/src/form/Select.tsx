@@ -1,7 +1,5 @@
-import React, {useCallback} from "react";
-import useAxios from "../useAxios";
-import useFetch from 'use-http';
-import { FormControl, InputLabel, MenuItem, Select } from "@mui/material";
+import React from 'react';
+import { FormControl, InputLabel, MenuItem, Select } from '@mui/material';
 
 const formControl = {
     minWidth: 120,
@@ -12,10 +10,8 @@ function SelectFC(props: any) {
     const { onChange, value, options = [], label, ...rest } = props;
 
     const handleChange = (event: any) => {
-        console.log(event.target.value);
         onChange(event.target.value)
     };
-    console.log(value);
       
     return (
         <FormControl sx={formControl}>

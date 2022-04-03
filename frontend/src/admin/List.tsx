@@ -1,8 +1,6 @@
-import React, { FC, useState } from "react";
-import resources from "../entities/index";
-import { useTable } from "react-table";
-import useAxios from "../useAxios";
-import PropTypes from "prop-types";
+import React, { FC, Fragment, useState } from 'react';
+import resources from '../entities/index';
+import { useTable } from 'react-table';
 import {
   Box,
   Table,
@@ -16,14 +14,14 @@ import {
   MenuItem,
   TextField,
   IconButton,
-} from "@mui/material";
-import settings from "./settings";
-import useFetch from "use-http";
+} from '@mui/material';
+import settings from './settings';
+import useFetch from 'use-http';
 import ClearIcon from '@mui/icons-material/Clear';
 
 const configKeys: any = {
-  header: "Header",
-  render: "accessor",
+  header: 'Header',
+  render: 'accessor',
 };
 
 const mapConfig = (config: any) => {
@@ -39,22 +37,22 @@ const getTableColumns = (resource: string) => {
   const config = resources[resource];
   let fields = config.list;
   if (!fields) {
-    return "Missing list configuration.";
+    return 'Missing list configuration.';
   }
   const columns: any[] = [];
   fields.forEach((list: any) => {
     list = mapConfig(list);
     const { name, type } = list;
     let accessor: any = name;
-    if (type === "many2many") {
+    if (type === 'many2many') {
       accessor = (data: any) => {
         const values = data[name];
         return values
-          ? values.map((item: any) => item[list.show]).join(", ")
+          ? values.map((item: any) => item[list.show]).join(', ')
           : null;
       };
     }
-    if (type === "foreignKey") {
+    if (type === 'foreignKey') {
       accessor = (data: any) => {
         return data[name] ? data[name][list.show] : null;
       };
@@ -77,7 +75,8 @@ interface ListProps {
   dispatch: Function;
 }
 
-const List: FC<ListProps> = ({ resource, dispatch }) => {
+const List: FC<ListProps> = (props: any) => {
+  const { resource, dispatch } = props;
   const resourceName = resource.name;
   const tableColumns = getTableColumns(resourceName);
   const [filters, setFilters] = useState([] as any[]);
@@ -125,12 +124,12 @@ const List: FC<ListProps> = ({ resource, dispatch }) => {
   };
 
   const addItem = () => {
-    dispatch({ type: "showForm" });
+    dispatch({ type: 'showForm' });
   };
 
   const editItem = (row: any) => {
     const rowId = row.original[settings.primaryKey];
-    dispatch({ type: "showForm", rowId });
+    dispatch({ type: 'showForm', rowId });
   };
 
   const filteredData = data.filter((value: any) => {
@@ -165,12 +164,12 @@ const List: FC<ListProps> = ({ resource, dispatch }) => {
           Add new {config.name}
         </Button>
       </Box>
-      <Box alignItems={"end"}>
+      <Box alignItems={'end'}>
         <Button
           id="basic-button"
-          aria-controls={open ? "basic-menu" : undefined}
+          aria-controls={open ? 'basic-menu' : undefined}
           aria-haspopup="true"
-          aria-expanded={open ? "true" : undefined}
+          aria-expanded={open ? 'true' : undefined}
           onClick={handleClick}
         >
           Filter
@@ -181,12 +180,12 @@ const List: FC<ListProps> = ({ resource, dispatch }) => {
           open={open}
           onClose={handleClose}
           MenuListProps={{
-            "aria-labelledby": "basic-button",
+            'aria-labelledby': 'basic-button',
           }}
         >
           {config.filter.map((filter: any) => {
             return (
-              <MenuItem onClick={() => addFilter(filter)}>
+              <MenuItem key={filter.name} onClick={() => addFilter(filter)}>
                 {filter.name}
               </MenuItem>
             );
@@ -196,8 +195,8 @@ const List: FC<ListProps> = ({ resource, dispatch }) => {
       <Box>
         {filters.map((filter: any) => {
           return (
-            <>
-              {filter.type === "text" && (
+            <Fragment key={filter.name}>
+              {filter.type === 'text' && (
                 <TextField
                   name={filter.name}
                   value={filter.value}
@@ -205,7 +204,7 @@ const List: FC<ListProps> = ({ resource, dispatch }) => {
                   size="small"
                 ></TextField>
               )}
-              {filter.type === "select" && (
+              {filter.type === 'select' && (
                 <Select
                 size="small"
                 name={filter.name}
@@ -219,7 +218,7 @@ const List: FC<ListProps> = ({ resource, dispatch }) => {
               <IconButton onClick={() => removeFilter(filter.name)}>
                 <ClearIcon />
               </IconButton>
-            </>
+            </Fragment>
           );
         })}
       </Box>
@@ -228,24 +227,24 @@ const List: FC<ListProps> = ({ resource, dispatch }) => {
       <Table {...getTableProps()}>
         <TableHead>
           {headerGroups.map((headerGroup) => (
-            <TableRow {...headerGroup.getHeaderGroupProps()}>
+            <TableRow {...headerGroup.getHeaderGroupProps()} key={headerGroup.id}>
               {headerGroup.headers.map((column) => (
-                <TableCell {...column.getHeaderProps()}>
-                  {column.render("Header")}
+                <TableCell {...column.getHeaderProps()} key={column.id}>
+                  {column.render('Header')}
                 </TableCell>
               ))}
             </TableRow>
           ))}
         </TableHead>
         <TableBody>
-          {rows.map((row, i) => {
+          {rows.map((row) => {
             prepareRow(row);
             return (
-              <TableRow {...row.getRowProps()}>
-                {row.cells.map((cell) => {
+              <TableRow {...row.getRowProps()} key={row.id}>
+                {row.cells.map((cell, index) => {
                   return (
-                    <TableCell {...cell.getCellProps()}>
-                      {cell.render("Cell")}
+                    <TableCell {...cell.getCellProps()} key={index}>
+                      {cell.render('Cell')}
                     </TableCell>
                   );
                 })}

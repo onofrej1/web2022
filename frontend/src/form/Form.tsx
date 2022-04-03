@@ -1,7 +1,6 @@
-import React, { useState, useCallback, FC } from "react";
-import Field from "./Field";
-import Box from "@mui/material/Box";
-import { Button, Grid, Typography } from "@mui/material";
+import React, { useState, useCallback, FC } from 'react';
+import Field from './Field';
+import { Button, Grid, Typography, Box } from '@mui/material';
 
 interface FormProps {
   fields: any;
@@ -17,7 +16,7 @@ const Form: FC<FormProps> = (props: any) => {
   const updateValue = useCallback(
     (name: string) => {
       return (value: any) => {
-        //console.log("update value:" + name + ":" + value);
+        //console.log('update value:' + name + ':' + value);
         setData({
           ...data,
           [name]: value,

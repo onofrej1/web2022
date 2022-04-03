@@ -1,14 +1,9 @@
-import Paper from "@mui/material/Paper";
-import MenuList from "@mui/material/MenuList";
-import MenuItem from "@mui/material/MenuItem";
-import ListItemText from "@mui/material/ListItemText";
-import ListItemIcon from "@mui/material/ListItemIcon";
-import ContentCut from "@mui/icons-material/ContentCut";
-import ContentPaste from "@mui/icons-material/ContentPaste";
-import { Link } from "react-router-dom";
-import resources from "../entities/index";
+import React from 'react';
+import ContentCut from '@mui/icons-material/ContentCut';
+import { Link } from 'react-router-dom';
+import resources from '../entities/index';
 import SaveIcon from '@mui/icons-material/Save';
-import React from "react";
+import { ListItemIcon, ListItemText, MenuItem, MenuList, Paper } from '@mui/material';
 
 const menuIcons: any = {
   contentCut: ContentCut,
@@ -35,7 +30,7 @@ export default function Menu() {
   });
 
   return (
-    <Paper sx={{ width: 220, height: "100vh" }}>
+    <Paper sx={{ width: 220, height: '100vh' }}>
       <MenuList>
         {items.map((item) => {
           return (
@@ -43,8 +38,8 @@ export default function Menu() {
               <ListItemIcon>{item.icon}</ListItemIcon>
               <ListItemText>
                 <Link
-                  style={{ textDecoration: "none", color: "black" }}
-                  to={"entity/" + item.resource}
+                  style={{ textDecoration: 'none', color: 'black' }}
+                  to={`entity/${item.resource}`}
                 >
                   {item.title}
                 </Link>

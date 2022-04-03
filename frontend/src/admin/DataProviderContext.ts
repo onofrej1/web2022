@@ -1,7 +1,7 @@
-import { createContext } from "react";
+import { createContext } from 'react';
 
 const DataProviderContext = createContext<any>(null);
 
-DataProviderContext.displayName = "DataProviderContext";
+DataProviderContext.displayName = 'DataProviderContext';
 
 export default DataProviderContext;

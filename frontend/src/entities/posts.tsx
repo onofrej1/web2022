@@ -1,52 +1,52 @@
 export default {
-  name: "Post",
+  name: 'Post',
   menuIcon: 'saveIcon',
-  resource: "posts",
+  resource: 'posts',
   filter: [
-    { name: "title", type: "select", op: "eq", label: "Title" },
-    { name: "text", type: "text", op: "contains", label: "Text" },
+    { name: 'title', type: 'select', op: 'eq', label: 'Title' },
+    { name: 'text', type: 'text', op: 'contains', label: 'Text' },
   ],
   form: [
-    { name: "title", type: "text" },
+    { name: 'title', type: 'text' },
     {
-      name: "author",
-      type: "foreignKey",
-      resource: "users",
+      name: 'author',
+      type: 'foreignKey',
+      resource: 'users',
       value: 'pk',
-      //text: "last_name",
+      //text: 'last_name',
       textRender: (author: any) => {
-        if (!author) return "";
-        return author.first_name + " " + author.last_name;
+        if (!author) return '';
+        return author.first_name + ' ' + author.last_name;
       }
     },
     {
-      name: "tags",
-      type: "many2many",
-      resource: "tags",
+      name: 'tags',
+      type: 'many2many',
+      resource: 'tags',
       value: 'pk',
-      text: "name",
+      text: 'name',
     },
-    { name: "text", type: "text" },
+    { name: 'text', type: 'text' },
     //{ name: 'content', type: 'editor' },
   ],
   list: [
-    { name: "title", custom: "custom" },
-    { name: "text" },
+    { name: 'title', custom: 'custom' },
+    { name: 'text' },
     {
-      name: "author",
-      type: "foreignKey",
-      //show: "last_name",
+      name: 'author',
+      type: 'foreignKey',
+      //show: 'last_name',
       render: ({ author }: any) => {
-        if (!author) return "";
-        return author.first_name + " " + author.last_name;
+        if (!author) return '';
+        return author.first_name + ' ' + author.last_name;
       },
     },
     {
-      name: "tags",
-      type: "many2many",
-      show: "name",
+      name: 'tags',
+      type: 'many2many',
+      show: 'name',
       /*render: ({ tags }: any) => {
-        return tags.map((tag: any) => tag.name).join(", ");
+        return tags.map((tag: any) => tag.name).join(', ');
       },*/
     },
   ],

@@ -1,4 +1,4 @@
-import settings from "./settings";
+import settings from './settings';
 
 function isObject(obj: any) {
   return obj === Object(obj);

@@ -1,4 +1,5 @@
-import DataProviderContext from "./DataProviderContext";
+import DataProviderContext from './DataProviderContext';
+import React  from 'react';
 
 function AdminContext(props: any) {
   const { children, dataProvider } = props;

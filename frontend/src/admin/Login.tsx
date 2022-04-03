@@ -1,5 +1,5 @@
-const Login = () => {
-  return <div>login</div>;
-};
+import React  from 'react';
 
-export { Login };
+export default function Login() {
+  return <div>login</div>;
+}

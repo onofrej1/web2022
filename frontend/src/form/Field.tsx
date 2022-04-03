@@ -1,10 +1,8 @@
-import React, { FC } from "react";
-import Select from "./Select";
-import Text from "./Text";
+import React from 'react';
+import Select from './Select';
+import Text from './Text';
 
-function Field (props: any) {
-    const fieldId = new Date().getTime().toString();
-
+export default function Field (props: any) {
     const {
         label,
         type,
@@ -15,7 +13,6 @@ function Field (props: any) {
 
     
     const inputProps = {
-        id: fieldId,
         label: label || props.name,
         // inputType: text|email|color...
         required,
@@ -25,14 +22,14 @@ function Field (props: any) {
         inputProps.multiple = true;
     }
 
-    const components: Record<string, FC> = {
+    const components: Record<string, React.ElementType> = {
        'text': Text, 
        'select': Select,
        'foreignKey': Select,
        'many2many': Select,
     };
 
-    const Component: FC = components[type];
+    const Component = components[type];
     //console.log(inputProps);
 
     return (
@@ -46,5 +43,3 @@ function Field (props: any) {
         </div>
     )
 }
-
-export default Field;

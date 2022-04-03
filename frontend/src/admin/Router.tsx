@@ -1,7 +1,7 @@
-import { useRoutes, Outlet, BrowserRouter } from "react-router-dom";
-import { Layout } from "./Layout";
-import { Login } from "./Login";
-import { Resources } from "./Resources";
+import { useRoutes, Outlet, BrowserRouter } from 'react-router-dom';
+import { Layout } from './Layout';
+import Login from './Login';
+import { Resources } from './Resources';
 
 const DashboardComponent = () => {
   return <h1>component</h1>;
@@ -11,22 +11,22 @@ const RenderRoutes = (props: any) => {
   const { routes: customRoutes } = props;
   let baseRoutes = [
     {
-      path: "login",
+      path: 'login',
       element: <Login />,
     },
   ];
   const resources = [
     {
-      path: "entity/:resource",
+      path: 'entity/:resource',
       element: <Resources />,
     },
   ];
 
   let routes = [
     {
-      path: "admin",
+      path: 'admin',
       element: <Layout />,
-      children: [{ path: "dashboard", element: <DashboardComponent /> }]
+      children: [{ path: 'dashboard', element: <DashboardComponent /> }]
         .concat(resources)
         .concat(customRoutes),
     },

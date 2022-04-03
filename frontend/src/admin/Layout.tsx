@@ -1,32 +1,33 @@
-import { Box } from "@mui/system";
-import AppBar from "./AppBar";
-import Menu from "./Menu";
-import { Outlet } from "react-router-dom";
+import { Box } from '@mui/system';
+import AppBar from './AppBar';
+import Menu from './Menu';
+import { Outlet } from 'react-router-dom';
+import React from 'react';
 
 const Layout = () => {
   const BoxStyles = {
-    display: "grid",
-    gridTemplateColumns: "repeat(4, 1fr)",
+    display: 'grid',
+    gridTemplateColumns: 'repeat(4, 1fr)',
     gap: 1,
-    gridTemplateRows: "auto",
-    gridTemplateAreas: `"header header header header"
-        "sidebar main main main"
-        "footer footer footer footer"`,
+    gridTemplateRows: 'auto',
+    gridTemplateAreas: `'header header header header'
+        'sidebar main main main'
+        'footer footer footer footer'`,
   };
 
   return (
     <>
       <Box sx={BoxStyles}>
-        <Box sx={{ gridArea: "header" }}>
+        <Box sx={{ gridArea: 'header' }}>
           <AppBar />
         </Box>
-        <Box sx={{ gridArea: "main" }}>
+        <Box sx={{ gridArea: 'main' }}>
           <Outlet />
         </Box>
-        <Box sx={{ gridArea: "sidebar" }}>
+        <Box sx={{ gridArea: 'sidebar' }}>
           <Menu />
         </Box>
-        <Box sx={{ gridArea: "footer" }}>Footer</Box>
+        <Box sx={{ gridArea: 'footer' }}>Footer</Box>
       </Box>
     </>
   );

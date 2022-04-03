@@ -1,23 +1,16 @@
-import Form from "../form/Form";
-import { FC, useEffect, useState } from "react";
-import resources from "../entities/index";
-import useFetch from "use-http";
+import React from 'react';
+import Form from '../form/Form';
+import { useEffect, useState } from 'react';
+import resources from '../entities/index';
+import useFetch from 'use-http';
 import SaveIcon from '@mui/icons-material/Save';
 import CancelIcon from '@mui/icons-material/Cancel';
 import settings from './settings';
-import { getValue } from "./utils";
-import { Box, Button } from "@mui/material";
+import { getValue } from './utils';
+import { Box, Button } from '@mui/material';
 
-interface AdminFormProps {
-  resource: {
-    name: string;
-    title: string;
-    rowId: number;
-  };
-  dispatch: Function;
-}
-
-export default function AdminForm({ resource, dispatch }: AdminFormProps) {
+export default function AdminForm(props: any) {
+  const { resource, dispatch } = props;
   const { get, post, patch, loading, error } = useFetch(settings.baseUrl);
   const [fields, setFields] = useState([] as any[]);
   const [data, setData] = useState();
@@ -39,10 +32,10 @@ export default function AdminForm({ resource, dispatch }: AdminFormProps) {
     async function getOptions() {
       for (const field of formConfig) {
         if (
-          ["foreignKey", "many2many"].includes(field.type) &&
+          ['foreignKey', 'many2many'].includes(field.type) &&
           field.resource
         ) {
-          let options = await get("/" + field.resource);
+          let options = await get(`/${field.resource}`);
           options = options.map((option: any) => {
             const text = field.textRender ? field.textRender(option) : option[field.text];
             const value = option[field.value];
@@ -58,19 +51,16 @@ export default function AdminForm({ resource, dispatch }: AdminFormProps) {
   }, []);
 
   const handleSubmit = async(data: any, e: any) => {
-    console.log('submit');
     const button = e.target;
-    console.log(e.target);
 
     if (button.id === 'cancel') {
-      dispatch({ type: "showList" });
+      dispatch({ type: 'showList' });
       return;
     }
 
     if (button.id === 'save-and-close') {
-      dispatch({ type: "showList" });
+      dispatch({ type: 'showList' });
     }
-    return;
     if (data.pk) {
       const url = `/${resource.name}/${resource.rowId}/`;
       patch(url, data);
@@ -81,13 +71,13 @@ export default function AdminForm({ resource, dispatch }: AdminFormProps) {
   };
  
   const Actions = [
-    <Button variant="contained" id="cancel" color="secondary">
+    <Button key="cancel" variant="contained" id="cancel" color="secondary">
       <CancelIcon fontSize="small" /> Cancel
     </Button>,
-    <Button variant="contained" id="save" color="primary">
+    <Button key="save" variant="contained" id="save" color="primary">
       <SaveIcon fontSize="small" /> Save
     </Button>,
-    <Button variant="contained" id="save-and-close" color="primary">
+    <Button key="save-and-close" variant="contained" id="save-and-close" color="primary">
       <SaveIcon fontSize="small" /> Save and close
     </Button>,
   ];
