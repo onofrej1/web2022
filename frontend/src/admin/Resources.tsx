@@ -2,8 +2,8 @@ import React from 'react';
 import List from './List';
 import { useReducer } from 'react';
 import { useParams } from 'react-router-dom';
-import Form from './Form';
-import resources from '../entities/index';
+import { Form } from './Form';
+import resources from '../resources/index';
 import { Box, Typography } from '@mui/material';
 
 const defaultState = {
@@ -13,7 +13,7 @@ const defaultState = {
   data: null,
 };
 
-const Resources = () => {
+export const Resources = () => {
   const params = useParams();
   const resource = params.resource;
 
@@ -71,5 +71,3 @@ const Resources = () => {
     </div>
   );
 };
-
-export { Resources };

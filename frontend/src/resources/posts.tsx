@@ -12,9 +12,9 @@ export default {
       name: 'author',
       type: 'foreignKey',
       resource: 'users',
-      value: 'pk',
-      //text: 'last_name',
-      textRender: (author: any) => {
+      valueField: 'pk',
+      //textField: 'last_name',
+      render: (author: any) => {
         if (!author) return '';
         return author.first_name + ' ' + author.last_name;
       }
@@ -22,15 +22,15 @@ export default {
     {
       name: 'tags',
       type: 'many2many',
-      resource: 'tags',
-      value: 'pk',
-      text: 'name',
+      resource: 'tagexs',
+      valueField: 'pk',
+      textField: 'name',
     },
     { name: 'text', type: 'text' },
     //{ name: 'content', type: 'editor' },
   ],
   list: [
-    { name: 'title', custom: 'custom' },
+    { name: 'title' },
     { name: 'text' },
     {
       name: 'author',

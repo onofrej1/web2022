@@ -1,34 +1,26 @@
-import React, { useState, useCallback } from 'react';
-import Field from './Field';
+import React, { useState, useCallback, FC } from 'react';
+import { Field } from './Field';
 import { Button, Grid, Box } from '@mui/material';
+import { Field as FieldType } from '../resources/resources.types';
 
-/*interface FormProps {
-  fields: any;
-  handleSubmit?: (data: any, e?: any) => void;
-  actions?: Array<any>;
-  data?: any;
-}*/
-
-interface DataEntry {
-  [key: string]: {
-
-  };
+interface FormData {
+  [key: string]: any;
 }
 
-interface FormProps {
-  fields: [];
-  actions: [];
-  data: DataEntry;
-  handleSubmit: (data: DataEntry) => void;
+interface Props {
+  fields: FieldType[];
+  actions: JSX.Element[];
+  data: FormData;
+  handleSubmit: (data: FormData, e: React.MouseEvent<HTMLButtonElement>) => void;
 }
 
-export default function Form (props: FormProps) {
+export const Form: FC<Props> = (props) => {
   const { fields, actions = [], data: defaultData = {}, handleSubmit } = props;
   const [data, setData] = useState(defaultData);
 
   const updateValue = useCallback(
     (name: string) => {
-      return (value: any) => {
+      return (value: string) => {
         //console.log('update value:' + name + ':' + value);
         setData({
           ...data,
@@ -39,14 +31,14 @@ export default function Form (props: FormProps) {
     [setData, data]
   );
 
-  const submit = () => {
-    handleSubmit(data);
+  const submit = (e: React.MouseEvent<HTMLButtonElement>) => {
+    handleSubmit(data, e);
   };
 
-  const clone = (el: any) => React.cloneElement(el, {
-    onClick: (e: any) => {
+  const clone = (el: JSX.Element) => React.cloneElement(el, {
+    onClick: (e: React.MouseEvent<HTMLButtonElement>) => {
       if (handleSubmit) {
-        handleSubmit(data);
+        handleSubmit(data, e);
       }
     }
   });
@@ -62,8 +54,8 @@ export default function Form (props: FormProps) {
             <Box mb={2} key={fieldName}>
               <Field
                 {...field}
-                onChange={updateValue(fieldName)}
                 value={value}
+                onChange={updateValue(fieldName)}
               />
             </Box>
           );
@@ -73,7 +65,6 @@ export default function Form (props: FormProps) {
             actions.map((action: any) => (
               <>
                 {clone(action)}
-                &nbsp;
               </>
             ))
           ) : (

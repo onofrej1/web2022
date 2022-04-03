@@ -1,5 +1,5 @@
 import React, { Fragment, useEffect, useState } from 'react';
-import resources from '../entities/index';
+import resources from '../resources/index';
 import { useTable } from 'react-table';
 import {
   Box,

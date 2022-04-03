@@ -1,18 +1,24 @@
-import React from 'react';
-import Form from '../form/Form';
+import React, { FC } from 'react';
+import { Form as AdminForm } from '../form/Form';
 import { useEffect, useState } from 'react';
-import resources from '../entities/index';
+import resources from '../resources/index';
 import useFetch from 'use-http';
 import SaveIcon from '@mui/icons-material/Save';
 import CancelIcon from '@mui/icons-material/Cancel';
 import settings from './settings';
 import { getValue } from './utils';
 import { Box, Button } from '@mui/material';
+import { Field } from '../resources/resources.types';
 
-export default function AdminForm(props: any) {
+interface Props {
+  resource: any;
+  dispatch: any;
+}
+
+export const Form: FC<Props> = (props) => {
   const { resource, dispatch } = props;
   const { get, post, patch, loading, error } = useFetch(settings.baseUrl);
-  const [fields, setFields] = useState([] as any[]);
+  const [fields, setFields] = useState<Field[]>([]);
   const [data, setData] = useState();
 
   // @ts-ignore
@@ -37,7 +43,9 @@ export default function AdminForm(props: any) {
         ) {
           let options = await get(`/${field.resource}`);
           options = options.map((option: any) => {
-            const text = field.textRender ? field.textRender(option) : option[field.text];
+            const text = field.textRender
+              ? field.textRender(option)
+              : option[field.text];
             const value = option[field.value];
             return { text, value };
           });
@@ -50,7 +58,7 @@ export default function AdminForm(props: any) {
     getOptions();
   }, []);
 
-  const handleSubmit = async(data: any, e: any) => {
+  const handleSubmit = async (data: any, e: any) => {
     const button = e.target;
 
     if (button.id === 'cancel') {
@@ -69,15 +77,20 @@ export default function AdminForm(props: any) {
       post(url, data);
     }
   };
- 
-  const Actions = [
+
+  const actions = [
     <Button key="cancel" variant="contained" id="cancel" color="secondary">
       <CancelIcon fontSize="small" /> Cancel
     </Button>,
     <Button key="save" variant="contained" id="save" color="primary">
       <SaveIcon fontSize="small" /> Save
     </Button>,
-    <Button key="save-and-close" variant="contained" id="save-and-close" color="primary">
+    <Button
+      key="save-and-close"
+      variant="contained"
+      id="save-and-close"
+      color="primary"
+    >
       <SaveIcon fontSize="small" /> Save and close
     </Button>,
   ];
@@ -87,12 +100,12 @@ export default function AdminForm(props: any) {
 
   return (
     <Box p={2}>
-      <Form
+      <AdminForm
         handleSubmit={handleSubmit}
         fields={fields}
-        actions={Actions}
+        actions={actions}
         data={data}
-      ></Form>
+      ></AdminForm>
     </Box>
   );
-}
+};

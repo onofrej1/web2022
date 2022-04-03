@@ -1,10 +1,26 @@
-import React from 'react';
-import Select from './Select';
-import Text from './Text';
+import React, { FC } from 'react';
+import { Select } from './Select';
+import { Text } from './Text';
 
-export default function Field (props: any) {
+export interface BaseProps {
+    name: string;
+    label: string;
+    value: string;
+    onChange: any;
+}
+
+interface FieldProps extends BaseProps {
+    type: string;
+    required?: boolean;
+    multiple?: boolean;
+    helpText?: string;
+}
+
+export const Field: FC<FieldProps> = (props) => {
     const {
+        name,
         label,
+        value,
         type,
         required,
         helpText,
@@ -12,14 +28,15 @@ export default function Field (props: any) {
     } = props
 
     
-    const inputProps = {
+    const componentProps = {
         label: label || props.name,
+        value,
         // inputType: text|email|color...
         required,
         ...rest,
     }
     if (type === 'many2many') {
-        inputProps.multiple = true;
+        componentProps.multiple = true;
     }
 
     const components: Record<string, React.ElementType> = {
@@ -30,12 +47,11 @@ export default function Field (props: any) {
     };
 
     const Component = components[type];
-    //console.log(inputProps);
 
     return (
         <div className="field mb-4 mt-4">
             <div className="field__input">
-                {<Component {...inputProps}/>}
+                {<Component {...componentProps}/>}
             </div>
             {<div className="field__help">
                 {helpText}

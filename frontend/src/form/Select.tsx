@@ -1,13 +1,19 @@
-import React from 'react';
-import { FormControl, InputLabel, MenuItem, Select } from '@mui/material';
+import React, { FC } from 'react';
+import { FormControl, InputLabel, MenuItem, Select as MuiSelect } from '@mui/material';
+import { BaseProps } from './Field';
 
 const formControl = {
-  minWidth: 120,
+  //minWidth: 120,
   width: '100%',
 };
 
-function SelectFC(props: any) {
-  const { onChange, value, options = [], label, ...rest } = props;
+interface Props extends BaseProps {
+  multiple?: boolean;
+  options: [];
+}
+
+export const Select: FC<Props> = (props) => {
+  const { name, label, value, onChange, options = [], ...rest } = props;
 
   const handleChange = (event: any) => {
     onChange(event.target.value);
@@ -16,7 +22,8 @@ function SelectFC(props: any) {
   return (
     <FormControl sx={formControl}>
       <InputLabel>{label}</InputLabel>
-      <Select
+      <MuiSelect
+        name={name}
         size="small"
         value={value}
         label={label}
@@ -28,9 +35,7 @@ function SelectFC(props: any) {
             {option.text}
           </MenuItem>
         ))}
-      </Select>
+      </MuiSelect>
     </FormControl>
   );
 }
-
-export default SelectFC;
