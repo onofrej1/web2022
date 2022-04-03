@@ -1,4 +1,4 @@
-import React, { FC, Fragment, useState } from 'react';
+import React, { Fragment, useEffect, useState } from 'react';
 import resources from '../entities/index';
 import { useTable } from 'react-table';
 import {
@@ -67,15 +67,15 @@ const getTableColumns = (resource: string) => {
   return columns;
 };
 
-interface ListProps {
+/*interface ListProps {
   resource: {
     name: string;
     title: string;
   };
   dispatch: Function;
-}
+}*/
 
-const List: FC<ListProps> = (props: any) => {
+export default function List(props: any) {
   const { resource, dispatch } = props;
   const resourceName = resource.name;
   const tableColumns = getTableColumns(resourceName);
@@ -87,6 +87,10 @@ const List: FC<ListProps> = (props: any) => {
 
   const url = `${settings.baseUrl}/${resourceName}`;
   const { data = [], loading, error } = useFetch(url, [url]);
+
+  useEffect(() => {
+    setFilters([]);
+  }, [resourceName]);
 
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
@@ -107,12 +111,13 @@ const List: FC<ListProps> = (props: any) => {
   };
 
   const removeFilter = (filterName: string) => {
-    const newFilters = filters.filter((filter: any) => filter.name !== filterName);
+    const newFilters = filters.filter(
+      (filter: any) => filter.name !== filterName
+    );
     setFilters(newFilters);
-  }
+  };
 
   const handleFilterChange = (e: any) => {
-    console.log(e.target);
     const filterName = e.target.name;
     const filter = filters.find((f) => f.name === filterName);
     filter.value = e.target.value;
@@ -206,14 +211,18 @@ const List: FC<ListProps> = (props: any) => {
               )}
               {filter.type === 'select' && (
                 <Select
-                size="small"
-                name={filter.name}
-                value={filter.value}
-                onChange={handleFilterChange}
-                sx={{ minWidth: 120 }}
-            >
-                {filter.options.map((option: any) => <MenuItem key={option.value} value={option.value}>{option.text}</MenuItem>)}
-            </Select>
+                  size="small"
+                  name={filter.name}
+                  value={filter.value}
+                  onChange={handleFilterChange}
+                  sx={{ minWidth: 120 }}
+                >
+                  {filter.options.map((option: any) => (
+                    <MenuItem key={option.value} value={option.value}>
+                      {option.text}
+                    </MenuItem>
+                  ))}
+                </Select>
               )}
               <IconButton onClick={() => removeFilter(filter.name)}>
                 <ClearIcon />
@@ -222,12 +231,14 @@ const List: FC<ListProps> = (props: any) => {
           );
         })}
       </Box>
-      <code>{JSON.stringify(filters, null, 4)}</code>
 
       <Table {...getTableProps()}>
         <TableHead>
           {headerGroups.map((headerGroup) => (
-            <TableRow {...headerGroup.getHeaderGroupProps()} key={headerGroup.id}>
+            <TableRow
+              {...headerGroup.getHeaderGroupProps()}
+              key={headerGroup.id}
+            >
               {headerGroup.headers.map((column) => (
                 <TableCell {...column.getHeaderProps()} key={column.id}>
                   {column.render('Header')}
@@ -258,7 +269,7 @@ const List: FC<ListProps> = (props: any) => {
       </Table>
     </div>
   );
-};
+}
 
 /*List.propTypes = {
     resource: PropTypes.shape({
@@ -266,5 +277,3 @@ const List: FC<ListProps> = (props: any) => {
         title: PropTypes.string,
     })
 }*/
-
-export default List;

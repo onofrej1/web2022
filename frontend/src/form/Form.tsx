@@ -1,15 +1,28 @@
-import React, { useState, useCallback, FC } from 'react';
+import React, { useState, useCallback } from 'react';
 import Field from './Field';
-import { Button, Grid, Typography, Box } from '@mui/material';
+import { Button, Grid, Box } from '@mui/material';
 
-interface FormProps {
+/*interface FormProps {
   fields: any;
   handleSubmit?: (data: any, e?: any) => void;
   actions?: Array<any>;
   data?: any;
+}*/
+
+interface DataEntry {
+  [key: string]: {
+
+  };
 }
 
-const Form: FC<FormProps> = (props: any) => {
+interface FormProps {
+  fields: [];
+  actions: [];
+  data: DataEntry;
+  handleSubmit: (data: DataEntry) => void;
+}
+
+export default function Form (props: FormProps) {
   const { fields, actions = [], data: defaultData = {}, handleSubmit } = props;
   const [data, setData] = useState(defaultData);
 
@@ -26,14 +39,14 @@ const Form: FC<FormProps> = (props: any) => {
     [setData, data]
   );
 
-  const submit = (e: any) => {
+  const submit = () => {
     handleSubmit(data);
   };
 
   const clone = (el: any) => React.cloneElement(el, {
     onClick: (e: any) => {
       if (handleSubmit) {
-        handleSubmit(data, e);
+        handleSubmit(data);
       }
     }
   });
@@ -46,12 +59,11 @@ const Form: FC<FormProps> = (props: any) => {
           const value = data[fieldName] || '';
           
           return (
-            <Box mb={2}>
+            <Box mb={2} key={fieldName}>
               <Field
                 {...field}
                 onChange={updateValue(fieldName)}
                 value={value}
-                key={fieldName}
               />
             </Box>
           );
@@ -77,6 +89,4 @@ const Form: FC<FormProps> = (props: any) => {
       <code>{JSON.stringify(data, null, 4)}</code>
     </Box>
   );
-};
-
-export default Form;
+}

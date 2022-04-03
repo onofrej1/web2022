@@ -10,13 +10,13 @@ const menuIcons: any = {
   saveIcon: SaveIcon,
 }
 
-const addMenuItemProps = (el: React.ReactElement<any>) => React.cloneElement(el, {
+/*const addMenuItemProps = (el: React.ReactElement<any>) => React.cloneElement(el, {
   fontSize: 'small',
-});
+});*/
 
 export default function Menu() {
   const items = Object.keys(resources).map((resourceKey: any) => {
-    // @ts-ignore
+    // ts-ignore
     const resource: any = resources[resourceKey];
     const Icon = menuIcons[resource.menuIcon] ? menuIcons[resource.menuIcon] : ContentCut;
     //const MenuIcon = addMenuItemProps(Icon);
