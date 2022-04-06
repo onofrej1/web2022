@@ -1,4 +1,4 @@
-import React  from 'react';
+import React from 'react';
 
 import AdminContext from './AdminContext';
 import Router from './Router';
@@ -13,7 +13,7 @@ const Admin = (props: any) => {
     dashboard,
     layout,
     theme,
-    title = "Admin",
+    title = 'Admin',
   } = props;
 
   const AdminDataProvider: any = {};

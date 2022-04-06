@@ -10,7 +10,7 @@ const DashboardComponent = () => {
 
 const RenderRoutes = (props: any) => {
   const { routes: customRoutes } = props;
-  let baseRoutes = [
+  const baseRoutes = [
     {
       path: 'login',
       element: <Login />,
@@ -23,7 +23,7 @@ const RenderRoutes = (props: any) => {
     },
   ];
 
-  let routes = [
+  const routes = [
     {
       path: 'admin',
       element: <Layout />,

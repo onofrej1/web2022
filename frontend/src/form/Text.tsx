@@ -1,20 +1,30 @@
-import React, { FC } from 'react';
-import { TextField } from '@mui/material';
-import { useCallback } from 'react';
+import React, { FC, useCallback } from 'react';
 import { BaseProps } from './Field';
+import { TextField } from '@mui/material';
 
 interface Props extends BaseProps {
-    inputType?: string;
+  inputType?: string;
 }
 
 export const Text: FC<Props> = (props) => {
-    const { name, label, value, onChange, ...rest } = props;
-
-    const handleChange = useCallback((event) => {
+  const { name, label, value, onChange, ...rest } = props,
+    handleChange = useCallback(
+      (event) => {
         onChange(event.target.value);
-    }, [onChange]);
+      },
+      [onChange]
+    );
 
-    return (
-        <TextField name={name} label={label} size="small" fullWidth variant="outlined" onChange={handleChange} value={value} {...rest}/>
-    )
-}
+  return (
+    <TextField
+      fullWidth
+      label={label}
+      name={name}
+      onChange={handleChange}
+      size="small"
+      value={value}
+      variant="outlined"
+      
+    />
+  );
+};

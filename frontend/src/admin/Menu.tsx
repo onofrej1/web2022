@@ -3,12 +3,18 @@ import ContentCut from '@mui/icons-material/ContentCut';
 import { Link } from 'react-router-dom';
 import resources from '../resources/index';
 import SaveIcon from '@mui/icons-material/Save';
-import { ListItemIcon, ListItemText, MenuItem, MenuList, Paper } from '@mui/material';
+import {
+  ListItemIcon,
+  ListItemText,
+  MenuItem,
+  MenuList,
+  Paper,
+} from '@mui/material';
 
 const menuIcons: any = {
   contentCut: ContentCut,
   saveIcon: SaveIcon,
-}
+};
 
 /*const addMenuItemProps = (el: React.ReactElement<any>) => React.cloneElement(el, {
   fontSize: 'small',
@@ -18,7 +24,9 @@ export default function Menu() {
   const items = Object.keys(resources).map((resourceKey: any) => {
     // @ts-ignore
     const resource: any = resources[resourceKey];
-    const Icon = menuIcons[resource.menuIcon] ? menuIcons[resource.menuIcon] : ContentCut;
+    const Icon = menuIcons[resource.menuIcon]
+      ? menuIcons[resource.menuIcon]
+      : ContentCut;
     //const MenuIcon = addMenuItemProps(Icon);
     //console.log(MenuIcon);
     const menuItem = {

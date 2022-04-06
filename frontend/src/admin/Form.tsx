@@ -23,6 +23,7 @@ export const Form: FC<Props> = (props) => {
 
   // @ts-ignore
   const config = resources[resource.name];
+  console.log(config);
   const formConfig: any[] = config.form;
 
   useEffect(() => {
@@ -41,12 +42,13 @@ export const Form: FC<Props> = (props) => {
           ['foreignKey', 'many2many'].includes(field.type) &&
           field.resource
         ) {
+          console.log(field.resource);
           let options = await get(`/${field.resource}`);
           options = options.map((option: any) => {
-            const text = field.textRender
-              ? field.textRender(option)
-              : option[field.text];
-            const value = option[field.value];
+            const text = field.render
+              ? field.render(option)
+              : option[field.textField];
+            const value = option[field.valueField];
             return { text, value };
           });
           field.options = options;

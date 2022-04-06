@@ -1,5 +1,10 @@
 import React, { FC } from 'react';
-import { FormControl, InputLabel, MenuItem, Select as MuiSelect } from '@mui/material';
+import {
+  FormControl,
+  InputLabel,
+  MenuItem,
+  Select as MuiSelect,
+} from '@mui/material';
 import { BaseProps } from './Field';
 
 const formControl = {
@@ -13,7 +18,7 @@ interface Props extends BaseProps {
 }
 
 export const Select: FC<Props> = (props) => {
-  const { name, label, value, onChange, options = [], ...rest } = props;
+  const { name, label, value, multiple, onChange, options = [], ...rest } = props;
 
   const handleChange = (event: any) => {
     onChange(event.target.value);
@@ -28,7 +33,7 @@ export const Select: FC<Props> = (props) => {
         value={value}
         label={label}
         onChange={handleChange}
-        {...rest}
+        multiple={multiple}
       >
         {options.map((option: any) => (
           <MenuItem key={option.value} value={option.value}>
@@ -38,4 +43,4 @@ export const Select: FC<Props> = (props) => {
       </MuiSelect>
     </FormControl>
   );
-}
+};

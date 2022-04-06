@@ -13,16 +13,16 @@ export default {
       type: 'foreignKey',
       resource: 'users',
       valueField: 'pk',
-      //textField: 'last_name',
+      textField: 'last_name',
       render: (author: any) => {
         if (!author) return '';
         return author.first_name + ' ' + author.last_name;
-      }
+      },
     },
     {
       name: 'tags',
       type: 'many2many',
-      resource: 'tagexs',
+      resource: 'tags',
       valueField: 'pk',
       textField: 'name',
     },

@@ -3,8 +3,8 @@ type Input = {
     label: string,
     type: string,
     resource?: string,
-    optionText?: string,
-    optionValue?: string,
+    textField?: string,
+    valueField?: string,
 }
 
 type Field = {
@@ -29,4 +29,4 @@ type Resource = {
     filter: Filter[];
 }
 
-export type { Resource, Input, Field, Filter }
+export type { Resource, Input, Field, Filter };

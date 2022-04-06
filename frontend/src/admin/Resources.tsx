@@ -42,6 +42,9 @@ export const Resources = () => {
 
   if (resource && state.name !== params.resource) {
     dispatch({ type: 'setName', name: params.resource });
+    if (state.type !== 'list') {
+      dispatch({ type: 'showList' });
+    }
   }
   // @ts-ignore
   const config = resources[resource];

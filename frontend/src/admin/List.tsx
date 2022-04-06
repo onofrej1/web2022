@@ -35,7 +35,7 @@ const mapConfig = (config: any) => {
 const getTableColumns = (resource: string) => {
   // @ts-ignore
   const config = resources[resource];
-  let fields = config.list;
+  const fields = config.list;
   if (!fields) {
     return 'Missing list configuration.';
   }
@@ -234,11 +234,11 @@ export default function List(props: any) {
 
       <Table {...getTableProps()}>
         <TableHead>
-          {headerGroups.map((headerGroup) => (
+          {headerGroups.map((headerGroup, index) => (
             <TableRow
               {...headerGroup.getHeaderGroupProps()}
-              key={headerGroup.id}
-            >
+              key={index}
+            > 
               {headerGroup.headers.map((column) => (
                 <TableCell {...column.getHeaderProps()} key={column.id}>
                   {column.render('Header')}
@@ -259,7 +259,7 @@ export default function List(props: any) {
                     </TableCell>
                   );
                 })}
-                <TableCell>
+                <TableCell key="row_action">
                   <Button onClick={() => editItem(row)}>Edit</Button>
                 </TableCell>
               </TableRow>

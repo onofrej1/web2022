@@ -18,14 +18,14 @@
     "react-scripts": "latest",
     "react-table": "^7.7.0",
     "styled-components": "^5.3.3",
-    "typescript": "latest",
     "use-http": "^1.0.26"
   },
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "lint": "eslint --ext .ts --ignore-path .gitignore ."
   },
   "browserslist": {
     "production": [
@@ -39,10 +39,16 @@
       "last 1 safari version"
     ]
   },
+  "eslintConfig": {
+    "extends": "react-app"
+  },
   "devDependencies": {
     "@types/react-table": "^7.7.8",
+    "@typescript-eslint/eslint-plugin": "^5.18.0",
+    "@typescript-eslint/parser": "^5.18.0",
     "eslint": "^8.12.0",
     "eslint-plugin-react": "^7.29.4",
-    "sass": "^1.43.5"
+    "sass": "^1.43.5",
+    "typescript": "^4.6.3"
   }
 }

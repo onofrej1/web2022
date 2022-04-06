@@ -1,22 +1,16 @@
 import Admin from './admin/Admin';
-import React  from 'react';
+import React from 'react';
 
 export default function App() {
-
   const CustomElement = () => {
-    return (
-      <div>Custom route</div>
-    );
+    return <div>Custom route</div>;
   };
 
-  const routes = [
-    { path: "custom", element: <CustomElement /> }
-  ];
+  const routes = [{ path: 'custom', element: <CustomElement /> }];
 
   return (
     <>
-      <Admin routes={routes}>
-      </Admin>
+      <Admin routes={routes}></Admin>
     </>
   );
 }

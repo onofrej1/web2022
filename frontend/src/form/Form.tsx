@@ -1,4 +1,4 @@
-import React, { useState, useCallback, FC } from 'react';
+import React, {useState, useCallback, FC, Fragment} from 'react';
 import { Field } from './Field';
 import { Button, Grid, Box } from '@mui/material';
 import { Field as FieldType } from '../resources/resources.types';
@@ -11,7 +11,10 @@ interface Props {
   fields: FieldType[];
   actions: JSX.Element[];
   data: FormData;
-  handleSubmit: (data: FormData, e: React.MouseEvent<HTMLButtonElement>) => void;
+  handleSubmit: (
+    data: FormData,
+    e: React.MouseEvent<HTMLButtonElement>
+  ) => void;
 }
 
 export const Form: FC<Props> = (props) => {
@@ -35,13 +38,14 @@ export const Form: FC<Props> = (props) => {
     handleSubmit(data, e);
   };
 
-  const clone = (el: JSX.Element) => React.cloneElement(el, {
-    onClick: (e: React.MouseEvent<HTMLButtonElement>) => {
-      if (handleSubmit) {
-        handleSubmit(data, e);
-      }
-    }
-  });
+  const clone = (el: JSX.Element) =>
+    React.cloneElement(el, {
+      onClick: (e: React.MouseEvent<HTMLButtonElement>) => {
+        if (handleSubmit) {
+          handleSubmit(data, e);
+        }
+      },
+    });
 
   return (
     <Box p={2}>
@@ -49,7 +53,7 @@ export const Form: FC<Props> = (props) => {
         {fields.map((field: any) => {
           const fieldName: string = field.name;
           const value = data[fieldName] || '';
-          
+
           return (
             <Box mb={2} key={fieldName}>
               <Field
@@ -62,11 +66,7 @@ export const Form: FC<Props> = (props) => {
         })}
         <Grid container>
           {actions.length ? (
-            actions.map((action: any) => (
-              <>
-                {clone(action)}
-              </>
-            ))
+            actions.map((action: any, index) => <Fragment key={index}>{clone(action)}</Fragment>)
           ) : (
             <>
               <Button variant="contained" onClick={submit} color="primary">
@@ -76,8 +76,8 @@ export const Form: FC<Props> = (props) => {
           )}
         </Grid>
       </form>
-      
+
       <code>{JSON.stringify(data, null, 4)}</code>
     </Box>
   );
-}
+};
