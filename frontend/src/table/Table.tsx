@@ -1,4 +1,3 @@
-
 import React, { ChangeEvent, FC } from 'react';
 
 import Checkbox from '@mui/material/Checkbox';
@@ -16,12 +15,15 @@ import TableToolbar from 'table/TableToolbar';
 import TablePaginationActions from 'table/TablePaginationActions';
 
 import {
+  useFilters,
   useGlobalFilter,
   usePagination,
   useRowSelect,
   useSortBy,
   useTable,
 } from 'react-table';
+import { DefaultFilter } from 'table/filters';
+import { Box } from '@mui/material';
 
 const IndeterminateCheckbox = React.forwardRef<HTMLInputElement, Props>(
   // eslint-disable-next-line react/prop-types
@@ -88,7 +90,7 @@ const EditableCell = ({
   return (
     <input
       style={inputStyle}
-      value={value}
+      value={value || ''}
       onChange={onChange}
       onBlur={onBlur}
     />
@@ -97,7 +99,7 @@ const EditableCell = ({
 
 EditableCell.propTypes = {
   cell: PropTypes.shape({
-    value: PropTypes.any.isRequired,
+    value: PropTypes.any, //.isRequired,
   }),
   row: PropTypes.shape({
     index: PropTypes.number.isRequired,
@@ -128,6 +130,13 @@ const Table: FC<Props> = ({
   updateMyData,
   skipPageReset,
 }) => {
+  const defaultColumn = React.useMemo(
+    () => ({
+      Filter: DefaultFilter,
+    }),
+    []
+  );
+
   const {
     getTableProps,
     headerGroups,
@@ -148,12 +157,13 @@ const Table: FC<Props> = ({
       // That way we can call this function from our cell renderer!
       updateMyData,
     },
+    useFilters,
     useGlobalFilter,
     useSortBy,
     usePagination,
     useRowSelect,
-    hooks => {
-      hooks.allColumns.push(columns => [
+    (hooks) => {
+      hooks.allColumns.push((columns) => [
         // Let's make a column for selection
         {
           id: 'selection',
@@ -189,7 +199,7 @@ const Table: FC<Props> = ({
   const deleteUserHandler = () => {
     const newData = removeByIndexs(
       data,
-      Object.keys(selectedRowIds).map(x => parseInt(x, 10))
+      Object.keys(selectedRowIds).map((x) => parseInt(x, 10))
     );
     setData(newData);
   };
@@ -199,7 +209,6 @@ const Table: FC<Props> = ({
     const newData = data.concat([user]);
     setData(newData);
   };
-  console.log(globalFilter);
 
   // Render the UI for your table
   return (
@@ -215,25 +224,40 @@ const Table: FC<Props> = ({
       <MaUTable {...getTableProps()}>
         <TableHead>
           {headerGroups.map((headerGroup, index) => (
-            <TableRow {...headerGroup.getHeaderGroupProps()} key={index}>
-              {headerGroup.headers.map(column => (
-                <TableCell
-                  {...(column.id === 'selection'
-                    ? column.getHeaderProps()
-                    : column.getHeaderProps(column.getSortByToggleProps()))}
-                  key={column.id}
-                >
-                  {column.render('Header')}
-                  {column.id !== 'selection' ? (
-                    <TableSortLabel
-                      active={column.isSorted}
-                      // react-table has a unsorted state which is not treated here
-                      direction={column.isSortedDesc ? 'desc' : 'asc'}
-                    />
-                  ) : null}
-                </TableCell>
-              ))}
-            </TableRow>
+            <>
+              <TableRow {...headerGroup.getHeaderGroupProps()} key={index}>
+                {headerGroup.headers.map((column) => (
+                  <TableCell
+                    {...(column.id === 'selection'
+                      ? column.getHeaderProps()
+                      : column.getHeaderProps(column.getSortByToggleProps()))}
+                    key={column.id}
+                  >
+                    {column.render('Header')}
+                    {column.id !== 'selection' ? (
+                      <TableSortLabel
+                        active={column.isSorted}
+                        // react-table has a unsorted state which is not treated here
+                        direction={column.isSortedDesc ? 'desc' : 'asc'}
+                      />
+                    ) : null}
+                  </TableCell>
+                ))}
+              </TableRow>
+
+              <TableRow {...headerGroup.getHeaderGroupProps()}>
+                {headerGroup.headers.map((column) => (
+                  <th {...column.getHeaderProps()} key={column.id} align="left">
+                    <Box ml={2} mt={1}>
+                      {/* Render the columns filter UI */}
+                      <div>
+                        {column.canFilter ? column.render('Filter') : null}
+                      </div>
+                    </Box>
+                  </th>
+                ))}
+              </TableRow>
+            </>
           ))}
         </TableHead>
         <TableBody>

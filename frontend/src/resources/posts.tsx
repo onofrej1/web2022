@@ -31,10 +31,11 @@ export default {
   ],
   list: [
     { name: 'title' },
-    { name: 'text' },
+    { name: 'text', filter: 'text' },
     {
       name: 'author',
       type: 'foreignKey',
+      filter: 'select',
       //show: 'last_name',
       render: ({ author }: any) => {
         if (!author) return '';

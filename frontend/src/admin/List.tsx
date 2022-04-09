@@ -15,10 +15,18 @@ import {
 import settings from 'admin/settings';
 import useFetch from 'use-http';
 import ClearIcon from '@mui/icons-material/Clear';
+import { DefaultFilter, NumberRangeFilter, SelectFilter, SliderFilter } from 'table/filters';
 
 const configKeys: any = {
   header: 'Header',
   render: 'accessor',
+};
+
+const filters: any = {
+  'text': DefaultFilter,
+  'select': SelectFilter,
+  'slider': SliderFilter,
+  'range': NumberRangeFilter,
 };
 
 const mapConfig = (config: any) => {
@@ -58,6 +66,9 @@ const getTableColumns = (resource: string) => {
     const col: any = {
       Header: name,
       accessor,
+      Filter: list.filter ? filters[list.filter] : filters.text,
+      filter: list.filter ? list.filter : 'text',
+      canFilter: list.filter,
     };
     columns.push(col);
   });
