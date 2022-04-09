@@ -12,8 +12,8 @@ import TableHead from '@mui/material/TableHead';
 import TablePagination from '@mui/material/TablePagination';
 import TableRow from '@mui/material/TableRow';
 import TableSortLabel from '@mui/material/TableSortLabel';
-import TableToolbar from './TableToolbar';
-import TablePaginationActions from './TablePaginationActions';
+import TableToolbar from 'table/TableToolbar';
+import TablePaginationActions from 'table/TablePaginationActions';
 
 import {
   useGlobalFilter,
@@ -103,7 +103,7 @@ EditableCell.propTypes = {
     index: PropTypes.number.isRequired,
   }),
   column: PropTypes.shape({
-    id: PropTypes.number.isRequired,
+    id: PropTypes.string.isRequired,
   }),
   updateMyData: PropTypes.func.isRequired,
 };
@@ -121,7 +121,7 @@ interface Props {
   skipPageReset: boolean;
 }
 
-const EnhancedTable: FC<Props> = ({
+const Table: FC<Props> = ({
   columns,
   data,
   setData,
@@ -144,12 +144,8 @@ const EnhancedTable: FC<Props> = ({
       data,
       defaultColumn,
       autoResetPage: !skipPageReset,
-      
-      // updateMyData isn't part of the API, but
-      // anything we put into these options will
-      // automatically be available on the instance.
-      // That way we can call this function from our
-      // cell renderer!
+      // anything we put into these options will automatically be available on the instance.
+      // That way we can call this function from our cell renderer!
       updateMyData,
     },
     useGlobalFilter,
@@ -161,19 +157,12 @@ const EnhancedTable: FC<Props> = ({
         // Let's make a column for selection
         {
           id: 'selection',
-          // The header can use the table's getToggleAllRowsSelectedProps method
-          // to render a checkbox.  Pagination is a problem since this will select all
-          // rows even though not all rows are on the current page.  The solution should
-          // be server side pagination.  For one, the clients should not download all
-          // rows in most cases.  The client should only download data for the current page.
-          // In that case, getToggleAllRowsSelectedProps works fine.
+          // works only for server side data
           Header: ({ getToggleAllRowsSelectedProps }: any) => (
             <div>
               <IndeterminateCheckbox {...getToggleAllRowsSelectedProps()} />
             </div>
           ),
-          // The cell can use the individual row's getToggleRowSelectedProps method
-          // to the render a checkbox
           Cell: ({ row }: any) => (
             <div>
               <IndeterminateCheckbox {...row.getToggleRowSelectedProps()} />
@@ -210,6 +199,7 @@ const EnhancedTable: FC<Props> = ({
     const newData = data.concat([user]);
     setData(newData);
   };
+  console.log(globalFilter);
 
   // Render the UI for your table
   return (
@@ -291,7 +281,7 @@ const EnhancedTable: FC<Props> = ({
   );
 };
 
-EnhancedTable.propTypes = {
+Table.propTypes = {
   columns: PropTypes.array.isRequired,
   data: PropTypes.array.isRequired,
   updateMyData: PropTypes.func.isRequired,
@@ -299,4 +289,4 @@ EnhancedTable.propTypes = {
   skipPageReset: PropTypes.bool.isRequired,
 };
 
-export default EnhancedTable;
+export default Table;

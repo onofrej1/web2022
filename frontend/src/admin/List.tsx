@@ -1,14 +1,11 @@
+
 import React, { Fragment, useEffect, useState } from 'react';
 import resources from 'resources/index';
-import { useTable } from 'react-table';
+import Table from 'table/Table';
+//import makeData from './makeData';
 import {
   Box,
-  Table,
   Button,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableRow,
   Select,
   Menu,
   MenuItem,
@@ -78,10 +75,8 @@ const getTableColumns = (resource: string) => {
 export default function List(props: any) {
   const { resource, dispatch } = props;
   const resourceName = resource.name;
-  const tableColumns = getTableColumns(resourceName);
   const [filters, setFilters] = useState([] as any[]);
-  const columnsStr = JSON.stringify(tableColumns);
-  const columns: any = React.useMemo(() => tableColumns, [columnsStr]);
+  const columns: any = React.useMemo(() => getTableColumns(resourceName), [resourceName]);
   // @ts-ignore
   const config = resources[resourceName];
 
@@ -151,13 +146,31 @@ export default function List(props: any) {
     return show;
   });
 
-  const {
-    getTableProps,
-    headerGroups,
-    rows,
-    prepareRow,
-    // getTableBodyProps,
-  } = useTable({ columns, data: filteredData });
+
+  const [tableData, setTableData] = React.useState<any[]>(React.useMemo(() => [], []));
+  const [skipPageReset, setSkipPageReset] = React.useState(false);
+
+  // We need to keep the table from resetting the pageIndex when we
+  // Update data. So we can keep track of that flag with a ref.
+
+  // When our cell renderer calls updateMyData, we'll use
+  // the rowIndex, columnId and new value to update the
+  // original data
+  const updateMyData = (rowIndex: number, columnId: string, value: string) => {
+    // We also turn on the flag to not reset the page
+    setSkipPageReset(true);
+    setTableData(old =>
+      old.map((row, index) => {
+        if (index === rowIndex) {
+          return {
+            ...old[rowIndex],
+            [columnId]: value,
+          };
+        }
+        return row;
+      })
+    );
+  };
 
   if (loading) return <div>loading...</div>;
   if (error) return <div>{error}</div>;
@@ -232,41 +245,14 @@ export default function List(props: any) {
         })}
       </Box>
 
-      <Table {...getTableProps()}>
-        <TableHead>
-          {headerGroups.map((headerGroup, index) => (
-            <TableRow
-              {...headerGroup.getHeaderGroupProps()}
-              key={index}
-            > 
-              {headerGroup.headers.map((column) => (
-                <TableCell {...column.getHeaderProps()} key={column.id}>
-                  {column.render('Header')}
-                </TableCell>
-              ))}
-            </TableRow>
-          ))}
-        </TableHead>
-        <TableBody>
-          {rows.map((row) => {
-            prepareRow(row);
-            return (
-              <TableRow {...row.getRowProps()} key={row.id}>
-                {row.cells.map((cell, index) => {
-                  return (
-                    <TableCell {...cell.getCellProps()} key={index}>
-                      {cell.render('Cell')}
-                    </TableCell>
-                  );
-                })}
-                <TableCell key="row_action">
-                  <Button onClick={() => editItem(row)}>Edit</Button>
-                </TableCell>
-              </TableRow>
-            );
-          })}
-        </TableBody>
-      </Table>
+      <Table
+        columns={columns}
+        data={data}
+        setData={setTableData}
+        updateMyData={updateMyData}
+        skipPageReset={skipPageReset}
+      />
+
     </div>
   );
 }

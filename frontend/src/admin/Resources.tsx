@@ -1,10 +1,10 @@
 import React from 'react';
-import List from './List1';
 import { useReducer } from 'react';
 import { useParams } from 'react-router-dom';
-import { Form } from './Form';
-import resources from '../resources/index';
 import { Box, Typography } from '@mui/material';
+import List from 'admin/List';
+import { Form } from 'admin/Form';
+import resources from 'resources/index';
 
 const defaultState = {
   name: 'posts',

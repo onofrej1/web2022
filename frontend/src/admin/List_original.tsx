@@ -1,10 +1,6 @@
-// @ts-nocheck
-/* eslint-disable */
 import React, { Fragment, useEffect, useState } from 'react';
 import resources from 'resources/index';
 import { useTable } from 'react-table';
-import List2 from './List2';
-//import makeData from './makeData';
 import {
   Box,
   Table,
@@ -163,50 +159,6 @@ export default function List(props: any) {
     // getTableBodyProps,
   } = useTable({ columns, data: filteredData });
 
-  const myData = [
-    { id: '1', name: 'Erik'},
-    { id: '2', name: 'John'},
-  ]
-
-  const [tableData, setTableData] = React.useState<any[]>(React.useMemo(() => myData, []))
-  const [skipPageReset, setSkipPageReset] = React.useState(false)
-
-  // We need to keep the table from resetting the pageIndex when we
-  // Update data. So we can keep track of that flag with a ref.
-
-  // When our cell renderer calls updateMyData, we'll use
-  // the rowIndex, columnId and new value to update the
-  // original data
-  const updateMyData = (rowIndex, columnId, value) => {
-    // We also turn on the flag to not reset the page
-    setSkipPageReset(true)
-    setTableData(old =>
-      old.map((row, index) => {
-        if (index === rowIndex) {
-          return {
-            ...old[rowIndex],
-            [columnId]: value,
-          }
-        }
-        return row
-      })
-    )
-  }
-
-  const columns2 = React.useMemo(
-    () => [
-      {
-        Header: 'Id',
-        accessor: 'id',
-      },
-      {
-        Header: 'Name',
-        accessor: 'name',
-      },
-    ],
-    []
-  )
-
   if (loading) return <div>loading...</div>;
   if (error) return <div>{error}</div>;
 
@@ -280,14 +232,41 @@ export default function List(props: any) {
         })}
       </Box>
 
-      <List2
-        columns={columns}
-        data={data}
-        setData={setTableData}
-        updateMyData={updateMyData}
-        skipPageReset={skipPageReset}
-      />
-
+      <Table {...getTableProps()}>
+        <TableHead>
+          {headerGroups.map((headerGroup, index) => (
+            <TableRow
+              {...headerGroup.getHeaderGroupProps()}
+              key={index}
+            > 
+              {headerGroup.headers.map((column) => (
+                <TableCell {...column.getHeaderProps()} key={column.id}>
+                  {column.render('Header')}
+                </TableCell>
+              ))}
+            </TableRow>
+          ))}
+        </TableHead>
+        <TableBody>
+          {rows.map((row) => {
+            prepareRow(row);
+            return (
+              <TableRow {...row.getRowProps()} key={row.id}>
+                {row.cells.map((cell, index) => {
+                  return (
+                    <TableCell {...cell.getCellProps()} key={index}>
+                      {cell.render('Cell')}
+                    </TableCell>
+                  );
+                })}
+                <TableCell key="row_action">
+                  <Button onClick={() => editItem(row)}>Edit</Button>
+                </TableCell>
+              </TableRow>
+            );
+          })}
+        </TableBody>
+      </Table>
     </div>
   );
 }

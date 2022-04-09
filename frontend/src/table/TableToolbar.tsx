@@ -1,9 +1,7 @@
 import React from 'react';
 
-import AddUserDialog from './AddUserDialog';
 import clsx from 'clsx';
 import DeleteIcon from '@mui/icons-material/Delete';
-import GlobalFilter from './GlobalFilter';
 import IconButton from '@mui/material/IconButton';
 import { lighten } from '@mui/material';
 import PropTypes from 'prop-types';
@@ -11,6 +9,8 @@ import Toolbar from '@mui/material/Toolbar';
 import Typography from '@mui/material/Typography';
 import Tooltip from '@mui/material/Tooltip';
 import { makeStyles } from 'tss-react/mui';
+import AddUserDialog from 'table/AddUserDialog';
+import GlobalFilter from 'table/GlobalFilter';
 
 const useToolbarStyles = makeStyles()((theme) => {
   return {
@@ -88,7 +88,7 @@ TableToolbar.propTypes = {
   deleteUserHandler: PropTypes.func.isRequired,
   setGlobalFilter: PropTypes.func.isRequired,
   preGlobalFilteredRows: PropTypes.array.isRequired,
-  globalFilter: PropTypes.string.isRequired,
+  globalFilter: PropTypes.string,
 };
 
 export default TableToolbar;
