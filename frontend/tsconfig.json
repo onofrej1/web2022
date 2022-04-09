@@ -28,7 +28,11 @@
       "@pages": ["./pages"],
       "@resources": ["./resources"],
       "@routes": ["./routes"],
-    }
+    },
+    "typeRoots": [
+      "node_modules/@types",
+       "node_modules"
+   ]
   },
   "include": [
     "src"

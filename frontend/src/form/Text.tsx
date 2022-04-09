@@ -7,7 +7,7 @@ interface Props extends BaseProps {
 }
 
 export const Text: FC<Props> = (props) => {
-  const { name, label, value, onChange, ...rest } = props,
+  const { name, label, value, onChange } = props,
     handleChange = useCallback(
       (event) => {
         onChange(event.target.value);

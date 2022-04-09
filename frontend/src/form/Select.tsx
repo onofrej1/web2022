@@ -1,9 +1,10 @@
-import React, { FC } from 'react';
+import React, { ChangeEvent, FC, SyntheticEvent } from 'react';
 import {
   FormControl,
   InputLabel,
   MenuItem,
   Select as MuiSelect,
+  SelectChangeEvent,
 } from '@mui/material';
 import { BaseProps } from './Field';
 
@@ -18,9 +19,9 @@ interface Props extends BaseProps {
 }
 
 export const Select: FC<Props> = (props) => {
-  const { name, label, value, multiple, onChange, options = [], ...rest } = props;
+  const { name, label, value, multiple, onChange, options = [] } = props;
 
-  const handleChange = (event: any) => {
+  const handleChange = (event: SelectChangeEvent) => {
     onChange(event.target.value);
   };
 

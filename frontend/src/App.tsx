@@ -1,5 +1,6 @@
 import Admin from './admin/Admin';
 import React from 'react';
+import CssBaseline from '@mui/material/CssBaseline';
 
 export default function App() {
   const CustomElement = () => {
@@ -10,6 +11,7 @@ export default function App() {
 
   return (
     <>
+      <CssBaseline />
       <Admin routes={routes}></Admin>
     </>
   );

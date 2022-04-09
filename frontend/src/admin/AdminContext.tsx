@@ -1,4 +1,4 @@
-import DataProviderContext from './DataProviderContext';
+import DataProviderContext from 'admin/DataProviderContext';
 import React  from 'react';
 
 function AdminContext(props: any) {

@@ -42,7 +42,6 @@ export const Form: FC<Props> = (props) => {
           ['foreignKey', 'many2many'].includes(field.type) &&
           field.resource
         ) {
-          console.log(field.resource);
           let options = await get(`/${field.resource}`);
           options = options.map((option: any) => {
             const text = field.render
@@ -68,15 +67,16 @@ export const Form: FC<Props> = (props) => {
       return;
     }
 
-    if (button.id === 'save-and-close') {
-      dispatch({ type: 'showList' });
-    }
     if (data.pk) {
       const url = `/${resource.name}/${resource.rowId}/`;
-      patch(url, data);
+      await patch(url, data);
     } else {
       const url = `/${resource.name}`;
-      post(url, data);
+      await post(url, data);
+    }
+
+    if (button.id === 'save-and-close') {
+      dispatch({ type: 'showList' });
     }
   };
 
@@ -97,7 +97,7 @@ export const Form: FC<Props> = (props) => {
     </Button>,
   ];
 
-  if (loading || !data) return <div>loading...</div>;
+  if (loading || !data) return <div>Loading...</div>;
   if (error) return <div>{error}</div>;
 
   return (

@@ -1,5 +1,5 @@
 import React from 'react';
-import List from './List';
+import List from './List1';
 import { useReducer } from 'react';
 import { useParams } from 'react-router-dom';
 import { Form } from './Form';

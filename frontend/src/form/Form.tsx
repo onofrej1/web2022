@@ -1,4 +1,4 @@
-import React, {useState, useCallback, FC, Fragment} from 'react';
+import React, { useState, useCallback, FC, Fragment } from 'react';
 import { Field } from './Field';
 import { Button, Grid, Box } from '@mui/material';
 import { Field as FieldType } from '../resources/resources.types';
@@ -66,7 +66,9 @@ export const Form: FC<Props> = (props) => {
         })}
         <Grid container>
           {actions.length ? (
-            actions.map((action: any, index) => <Fragment key={index}>{clone(action)}</Fragment>)
+            actions.map((action: any, index) => (
+              <Fragment key={index}>{clone(action)}</Fragment>
+            ))
           ) : (
             <>
               <Button variant="contained" onClick={submit} color="primary">
