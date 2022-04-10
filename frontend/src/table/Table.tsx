@@ -1,4 +1,4 @@
-import React, { ChangeEvent, FC } from 'react';
+import React, { ChangeEvent, FC, Fragment } from 'react';
 
 import Checkbox from '@mui/material/Checkbox';
 import MaUTable from '@mui/material/Table';
@@ -13,6 +13,7 @@ import TableRow from '@mui/material/TableRow';
 import TableSortLabel from '@mui/material/TableSortLabel';
 import TableToolbar from 'table/TableToolbar';
 import TablePaginationActions from 'table/TablePaginationActions';
+import { makeStyles } from 'tss-react/mui';
 
 import {
   useFilters,
@@ -23,7 +24,7 @@ import {
   useTable,
 } from 'react-table';
 import { DefaultFilter } from 'table/filters';
-import { Box } from '@mui/material';
+import { Box, Button } from '@mui/material';
 
 const IndeterminateCheckbox = React.forwardRef<HTMLInputElement, Props>(
   // eslint-disable-next-line react/prop-types
@@ -118,6 +119,7 @@ const defaultColumn = {
 interface Props {
   columns: any[]; // todo type
   data: any[]; //todo type
+  actions: any[]; // todo type
   setData: any;
   updateMyData: any;
   skipPageReset: boolean;
@@ -126,17 +128,11 @@ interface Props {
 const Table: FC<Props> = ({
   columns,
   data,
+  actions,
   setData,
   updateMyData,
   skipPageReset,
 }) => {
-  const defaultColumn = React.useMemo(
-    () => ({
-      Filter: DefaultFilter,
-    }),
-    []
-  );
-
   const {
     getTableProps,
     headerGroups,
@@ -151,7 +147,7 @@ const Table: FC<Props> = ({
     {
       columns,
       data,
-      defaultColumn,
+      //defaultColumn,
       autoResetPage: !skipPageReset,
       // anything we put into these options will automatically be available on the instance.
       // That way we can call this function from our cell renderer!
@@ -210,6 +206,32 @@ const Table: FC<Props> = ({
     setData(newData);
   };
 
+  const clone = (el: JSX.Element, row: any) =>
+  {
+    const elem = {...el};
+    return React.cloneElement(el, {
+      onClick: (e: React.MouseEvent<HTMLButtonElement> & { row: any }) => {
+        e.row = row;
+        // eslint-disable-next-line prefer-spread
+        elem.props.onClick.apply(elem, [e]);
+      },
+    });
+  };
+
+  const useStyles = makeStyles()({
+    tableFilter: {
+      borderBottom: '1px solid lightgray',
+      lineHeight: '43px !important',
+    },
+    tableRow: {
+      height: '15px !important',
+    },
+    tableCell: {
+      padding: '0px !important',
+    },
+  });
+  const { classes } = useStyles();
+
   // Render the UI for your table
   return (
     <TableContainer>
@@ -224,8 +246,11 @@ const Table: FC<Props> = ({
       <MaUTable {...getTableProps()}>
         <TableHead>
           {headerGroups.map((headerGroup, index) => (
-            <>
-              <TableRow {...headerGroup.getHeaderGroupProps()} key={index}>
+            <Fragment key={index}>
+              <TableRow
+                {...headerGroup.getHeaderGroupProps()}
+                key={'header_' + index}
+              >
                 {headerGroup.headers.map((column) => (
                   <TableCell
                     {...(column.id === 'selection'
@@ -245,9 +270,17 @@ const Table: FC<Props> = ({
                 ))}
               </TableRow>
 
-              <TableRow {...headerGroup.getHeaderGroupProps()}>
+              <TableRow
+                {...headerGroup.getHeaderGroupProps()}
+                className={classes.tableFilter}
+                key={'filter_' + index}
+              >
                 {headerGroup.headers.map((column) => (
-                  <th {...column.getHeaderProps()} key={column.id} align="left">
+                  <th
+                    {...column.getHeaderProps()}
+                    key={'filter' + column.id}
+                    align="left"
+                  >
                     <Box ml={2} mt={1}>
                       {/* Render the columns filter UI */}
                       <div>
@@ -257,14 +290,18 @@ const Table: FC<Props> = ({
                   </th>
                 ))}
               </TableRow>
-            </>
+            </Fragment>
           ))}
         </TableHead>
         <TableBody>
           {page.map((row, index) => {
             prepareRow(row);
             return (
-              <TableRow {...row.getRowProps()} key={index}>
+              <TableRow
+                {...row.getRowProps()}
+                className={classes.tableRow}
+                key={index}
+              >
                 {row.cells.map((cell, index) => {
                   return (
                     <TableCell {...cell.getCellProps()} key={index}>
@@ -272,6 +309,17 @@ const Table: FC<Props> = ({
                     </TableCell>
                   );
                 })}
+                <TableCell key={'action' + index}>
+                  {actions.length ? (
+                    actions.map((action: any, index) => (
+                      <Fragment key={index}>{clone(action, row)}</Fragment>
+                    ))
+                  ) : (
+                    <>
+                      <Button>Edit default</Button>
+                    </>
+                  )}
+                </TableCell>
               </TableRow>
             );
           })}
@@ -308,6 +356,7 @@ const Table: FC<Props> = ({
 Table.propTypes = {
   columns: PropTypes.array.isRequired,
   data: PropTypes.array.isRequired,
+  actions: PropTypes.array.isRequired,
   updateMyData: PropTypes.func.isRequired,
   setData: PropTypes.func.isRequired,
   skipPageReset: PropTypes.bool.isRequired,

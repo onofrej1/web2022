@@ -68,7 +68,7 @@ const getTableColumns = (resource: string) => {
       accessor,
       Filter: list.filter ? filters[list.filter] : filters.text,
       filter: list.filter ? list.filter : 'text',
-      canFilter: list.filter,
+      disableFilters: !list.filter,
     };
     columns.push(col);
   });
@@ -138,35 +138,23 @@ export default function List(props: any) {
     dispatch({ type: 'showForm' });
   };
 
-  const editItem = (row: any) => {
-    const rowId = row.original[settings.primaryKey];
+  const editItem = (e: any) => {
+    const rowId = e.row.original[settings.primaryKey];
     dispatch({ type: 'showForm', rowId });
   };
 
-  const filteredData = data.filter((value: any) => {
-    let show = true;
-    filters.forEach((filter: any) => {
-      if (filter.value === '' || filter.value === undefined) return;
-      if (filter.op === 'eq') {
-        show = value[filter.name] === filter.value;
-      }
-      if (filter.op === 'contains') {
-        show = value[filter.name].includes(filter.value);
-      }
-    });
-    return show;
-  });
-
+  const actions = [
+    <Button key="cancel" onClick={editItem} variant="contained" color="secondary">
+      Edit
+    </Button>,
+    <Button key="save" variant="contained" color="primary">
+      Delete
+    </Button>,
+  ];
 
   const [tableData, setTableData] = React.useState<any[]>(React.useMemo(() => [], []));
   const [skipPageReset, setSkipPageReset] = React.useState(false);
 
-  // We need to keep the table from resetting the pageIndex when we
-  // Update data. So we can keep track of that flag with a ref.
-
-  // When our cell renderer calls updateMyData, we'll use
-  // the rowIndex, columnId and new value to update the
-  // original data
   const updateMyData = (rowIndex: number, columnId: string, value: string) => {
     // We also turn on the flag to not reset the page
     setSkipPageReset(true);
@@ -259,6 +247,7 @@ export default function List(props: any) {
       <Table
         columns={columns}
         data={data}
+        actions={actions}
         setData={setTableData}
         updateMyData={updateMyData}
         skipPageReset={skipPageReset}
