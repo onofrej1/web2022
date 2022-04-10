@@ -23,7 +23,6 @@ export const Form: FC<Props> = (props) => {
 
   // @ts-ignore
   const config = resources[resource.name];
-  console.log(config);
   const formConfig: any[] = config.form;
 
   useEffect(() => {
@@ -66,6 +65,7 @@ export const Form: FC<Props> = (props) => {
       dispatch({ type: 'showList' });
       return;
     }
+    console.log(data);
 
     if (data.pk) {
       const url = `/${resource.name}/${resource.rowId}/`;

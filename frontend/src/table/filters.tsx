@@ -1,5 +1,7 @@
-import React from 'react';
+import React, { Fragment } from 'react';
 import { useAsyncDebounce } from 'react-table';
+import { Text } from 'form/Text';
+import { Select } from 'form/Select';
 // A great library for fuzzy filtering/sorting items
 //import matchSorter from 'match-sorter';
 
@@ -33,47 +35,28 @@ function GlobalFilter({
   );
 }
 
-function DefaultFilter({
-  column: { filterValue, preFilteredRows, setFilter },
-}: any) {
-  const count = preFilteredRows.length;
-
-  return (
-    <input
-      value={filterValue || ''}
-      onChange={(e) => {
-        setFilter(e.target.value || undefined); // Set undefined to remove the filter entirely
-      }}
-      placeholder={`Search ${count} records...`}
-    />
-  );
+function DefaultFilter({ column: { filterValue, setFilter, id } }: any) {
+  return <Text id={id} value={filterValue} onChange={setFilter} />;
 }
 
 function SelectFilter({
   column: { filterValue, setFilter, preFilteredRows, id },
 }: any) {
   const options = React.useMemo(() => {
-    const options = new Set<string>();
-    preFilteredRows.forEach((row: any) => {
-      options.add(row.values[id]);
-    });
-    return Array.from(options);
+    const values = new Set<string>();
+    preFilteredRows.forEach((row: any) => values.add(row.values[id]));
+    const data = Array.from(values).map((o) => ({ text: o, value: o }));
+    data.unshift({ text: 'All', value: '' });
+    return data;
   }, [id, preFilteredRows]);
 
   return (
-    <select
+    <Select
+      id={id}
       value={filterValue}
-      onChange={(e) => {
-        setFilter(e.target.value || undefined);
-      }}
-    >
-      <option value="">All</option>
-      {options.map((option, i) => (
-        <option key={i} value={option}>
-          {option}
-        </option>
-      ))}
-    </select>
+      onChange={setFilter}
+      options={options}
+    ></Select>
   );
 }
 
@@ -120,6 +103,36 @@ function NumberRangeFilter({
   }, [id, preFilteredRows]);
 
   return (
+    <Fragment>
+      <Text
+        value={filterValue[0] || ''}
+        type="number"
+        onChange={(e: any) => {
+          const val = e.target.value;
+          setFilter((old = []) => [
+            val ? parseInt(val, 10) : undefined,
+            old[1],
+          ]);
+        }}
+        placeholder={`Min (${min})`}
+      />{' '}
+      to
+      <Text
+        value={filterValue[1] || ''}
+        type="number"
+        onChange={(e: any) => {
+          const val = e.target.value;
+          setFilter((old = []) => [
+            old[0],
+            val ? parseInt(val, 10) : undefined,
+          ]);
+        }}
+        placeholder={`Min (${min})`}
+      />
+    </Fragment>
+  );
+
+  return (
     <div
       style={{
         display: 'flex',
@@ -162,13 +175,6 @@ function NumberRangeFilter({
   );
 }
 
-/*function fuzzyTextFilterFn(rows, id, filterValue) {
-  return matchSorter(rows, filterValue, { keys: [(row) => row.values[id]] });
-}
-
-// Let the table remove the filter if the string is empty
-fuzzyTextFilterFn.autoRemove = (val) => !val;*/
-
 // Add new filter or override existing filters, use with UseMemo
 const filterTypes = {
   test: () => {},
@@ -184,7 +190,8 @@ function filterGreaterThan(rows: any[], id: string, filterValue: string) {
   });
 }
 
-filterGreaterThan.autoRemove = (val: string | number) => typeof val !== 'number';
+filterGreaterThan.autoRemove = (val: string | number) =>
+  typeof val !== 'number';
 
 export {
   GlobalFilter,
@@ -192,7 +199,6 @@ export {
   SelectFilter,
   SliderFilter,
   NumberRangeFilter,
-  
   filterTypes,
   filterGreaterThan,
 };

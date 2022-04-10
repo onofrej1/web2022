@@ -1,4 +1,4 @@
-import React, { ChangeEvent, FC, SyntheticEvent } from 'react';
+import React, { FC } from 'react';
 import {
   FormControl,
   InputLabel,
@@ -15,13 +15,14 @@ const formControl = {
 
 interface Props extends BaseProps {
   multiple?: boolean;
-  options: [];
+  options: any[];
 }
 
 export const Select: FC<Props> = (props) => {
   const { name, label, value, multiple, onChange, options = [] } = props;
 
   const handleChange = (event: SelectChangeEvent) => {
+    console.log(event.target.value);
     onChange(event.target.value);
   };
 

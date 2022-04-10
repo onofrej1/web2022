@@ -30,7 +30,7 @@ export default {
     //{ name: 'content', type: 'editor' },
   ],
   list: [
-    { name: 'title' },
+    { name: 'title', filter: 'range' },
     { name: 'text', filter: 'text' },
     {
       name: 'author',
