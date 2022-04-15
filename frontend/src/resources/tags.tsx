@@ -2,8 +2,7 @@ export default {
   name: 'Tag',
   resource: 'tags',
   filter: [
-    { name: 'title', type: 'select', op: 'eq', label: 'Title' },
-    { name: 'text', type: 'text', op: 'contains', label: 'Text' },
+    { name: 'name', type: 'select', op: 'eq', label: 'Title' },
   ],
   form: [{ name: 'name', type: 'text' }],
   list: [{ name: 'name' }],

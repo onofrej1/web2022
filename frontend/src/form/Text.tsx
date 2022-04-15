@@ -4,16 +4,25 @@ import { TextField } from '@mui/material';
 
 interface Props extends BaseProps {
   type?: string;
+  min?: number;
+  max?: number;
 }
 
 export const Text: FC<Props> = (props) => {
-  const { name, label, value, type = 'text', placeholder, onChange } = props,
-    handleChange = useCallback(
-      (event) => {
-        onChange(event.target.value);
-      },
-      [onChange]
-    );
+  const { name, label, value, type = 'text', min, max, placeholder, onChange } = props;
+  const handleChange = useCallback(
+    (event) => {
+      onChange(event.target.value);
+    },
+    [onChange]
+  );
+
+  const InputProps = {
+    inputProps: { 
+      min,
+      max, 
+    }
+  };
 
   return (
     <TextField
@@ -22,6 +31,7 @@ export const Text: FC<Props> = (props) => {
       type={type}
       placeholder={placeholder}
       name={name}
+      InputProps={InputProps}
       onChange={handleChange}
       size="small"
       value={value || ''}

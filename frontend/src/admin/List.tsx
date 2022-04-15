@@ -15,7 +15,7 @@ import {
 import settings from 'admin/settings';
 import useFetch from 'use-http';
 import ClearIcon from '@mui/icons-material/Clear';
-import { DefaultFilter, NumberRangeFilter, SelectFilter, SliderFilter } from 'table/filters';
+import { DefaultFilter, filterGreaterThan, RangeFilter, SelectFilter, SliderFilter } from 'table/filters';
 
 const configKeys: any = {
   header: 'Header',
@@ -23,10 +23,10 @@ const configKeys: any = {
 };
 
 const filters: any = {
-  'text': DefaultFilter,
-  'select': SelectFilter,
-  'slider': SliderFilter,
-  'range': NumberRangeFilter,
+  'text': ['includes', DefaultFilter],
+  'select': ['equals', SelectFilter],
+  'slider': [filterGreaterThan, SliderFilter],
+  'range': ['between', RangeFilter],
 };
 
 const mapConfig = (config: any) => {
@@ -66,8 +66,8 @@ const getTableColumns = (resource: string) => {
     const col: any = {
       Header: name,
       accessor,
-      Filter: list.filter ? filters[list.filter] : filters.text,
-      filter: list.filter ? list.filter : 'text',
+      filter: list.filter ? filters[list.filter][0] : null,
+      Filter: list.filter ? filters[list.filter][1] : () => null,
       disableFilters: !list.filter,
     };
     columns.push(col);

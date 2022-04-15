@@ -19,17 +19,13 @@ function GlobalFilter({
   return (
     <span>
       Search:{' '}
-      <input
+      <Text
         value={value || ''}
-        onChange={(e) => {
-          setValue(e.target.value);
-          onChange(e.target.value);
+        onChange={(value: string) => {
+          setValue(value);
+          onChange(value);
         }}
         placeholder={`${count} records...`}
-        style={{
-          fontSize: '1.1rem',
-          border: '0',
-        }}
       />
     </span>
   );
@@ -75,13 +71,13 @@ function SliderFilter({
 
   return (
     <>
-      <input
+      <Text
         type="range"
         min={min}
         max={max}
         value={filterValue || min}
-        onChange={(e) => {
-          setFilter(parseInt(e.target.value, 10));
+        onChange={(value: string) => {
+          setFilter(parseInt(value, 10));
         }}
       />
       <button onClick={() => setFilter(undefined)}>Off</button>
@@ -89,7 +85,7 @@ function SliderFilter({
   );
 }
 
-function NumberRangeFilter({
+function RangeFilter({
   column: { filterValue = [], preFilteredRows, setFilter, id },
 }: any) {
   const [min, max] = React.useMemo(() => {
@@ -131,48 +127,6 @@ function NumberRangeFilter({
       />
     </Fragment>
   );
-
-  return (
-    <div
-      style={{
-        display: 'flex',
-      }}
-    >
-      <input
-        value={filterValue[0] || ''}
-        type="number"
-        onChange={(e) => {
-          const val = e.target.value;
-          setFilter((old = []) => [
-            val ? parseInt(val, 10) : undefined,
-            old[1],
-          ]);
-        }}
-        placeholder={`Min (${min})`}
-        style={{
-          width: '70px',
-          marginRight: '0.5rem',
-        }}
-      />
-      to
-      <input
-        value={filterValue[1] || ''}
-        type="number"
-        onChange={(e) => {
-          const val = e.target.value;
-          setFilter((old = []) => [
-            old[0],
-            val ? parseInt(val, 10) : undefined,
-          ]);
-        }}
-        placeholder={`Max (${max})`}
-        style={{
-          width: '70px',
-          marginLeft: '0.5rem',
-        }}
-      />
-    </div>
-  );
 }
 
 // Add new filter or override existing filters, use with UseMemo
@@ -198,7 +152,7 @@ export {
   DefaultFilter,
   SelectFilter,
   SliderFilter,
-  NumberRangeFilter,
+  RangeFilter,
   filterTypes,
   filterGreaterThan,
 };

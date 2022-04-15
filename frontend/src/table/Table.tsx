@@ -23,12 +23,13 @@ import {
   useSortBy,
   useTable,
 } from 'react-table';
-import { DefaultFilter } from 'table/filters';
 import { Box, Button } from '@mui/material';
 
 const IndeterminateCheckbox = React.forwardRef<HTMLInputElement, Props>(
-  // eslint-disable-next-line react/prop-types
-  ({ indeterminate, ...rest }: any, ref) => {
+  (props: any, ref) => {
+    console.log(props);
+    // eslint-disable-next-line react/prop-types
+    const { indeterminate, ...rest } = props;
     const defaultRef = React.useRef();
     const resolvedRef = ref || defaultRef;
 
@@ -46,9 +47,6 @@ const IndeterminateCheckbox = React.forwardRef<HTMLInputElement, Props>(
   }
 );
 IndeterminateCheckbox.displayName = 'IndeterminateCheckboxDisplayName';
-//IndeterminateCheckbox.propTypes = {
-//  indeterminate: PropTypes.object,
-//};
 
 const inputStyle = {
   padding: 0,
@@ -64,26 +62,22 @@ interface EditableCellProps {
   updateMyData: any;
 }
 
-// Create an editable cell renderer
 const EditableCell = ({
   value: initialValue,
   row: { index },
   column: { id },
   updateMyData, // This is a custom function that we supplied to our table instance
 }: EditableCellProps) => {
-  // We need to keep and update the state of the cell normally
   const [value, setValue] = React.useState(initialValue);
 
   const onChange = (e: ChangeEvent<HTMLInputElement>) => {
     setValue(e.target.value);
   };
 
-  // We'll only update the external data when the input is blurred
   const onBlur = () => {
     updateMyData(index, id, value);
   };
 
-  // If the initialValue is changed externall, sync it up with our state
   React.useEffect(() => {
     setValue(initialValue);
   }, [initialValue]);
@@ -159,24 +153,28 @@ const Table: FC<Props> = ({
     usePagination,
     useRowSelect,
     (hooks) => {
-      hooks.allColumns.push((columns) => [
-        // Let's make a column for selection
-        {
-          id: 'selection',
-          // works only for server side data
-          Header: ({ getToggleAllRowsSelectedProps }: any) => (
-            <div>
-              <IndeterminateCheckbox {...getToggleAllRowsSelectedProps()} />
-            </div>
-          ),
-          Cell: ({ row }: any) => (
-            <div>
-              <IndeterminateCheckbox {...row.getToggleRowSelectedProps()} />
-            </div>
-          ),
-        },
-        ...columns,
-      ]);
+      hooks.allColumns.push((columns) => {
+        console.log(columns);
+        return [
+          {
+            id: 'selection',
+            // works only for server side data
+            disableFilters: true,
+            Filter: () => null,
+            Header: ({ getToggleAllRowsSelectedProps }: any) => (
+              <div>
+                <IndeterminateCheckbox {...getToggleAllRowsSelectedProps()} />
+              </div>
+            ),
+            Cell: ({ row }: any) => (
+              <div>
+                <IndeterminateCheckbox {...row.getToggleRowSelectedProps()} />
+              </div>
+            ),
+          },
+          ...columns,
+        ];
+      });
     }
   );
 
@@ -206,9 +204,8 @@ const Table: FC<Props> = ({
     setData(newData);
   };
 
-  const clone = (el: JSX.Element, row: any) =>
-  {
-    const elem = {...el};
+  const clone = (el: JSX.Element, row: any) => {
+    const elem = { ...el };
     return React.cloneElement(el, {
       onClick: (e: React.MouseEvent<HTMLButtonElement> & { row: any }) => {
         e.row = row;
@@ -275,20 +272,22 @@ const Table: FC<Props> = ({
                 className={classes.tableFilter}
                 key={'filter_' + index}
               >
-                {headerGroup.headers.map((column) => (
-                  <th
-                    {...column.getHeaderProps()}
-                    key={'filter' + column.id}
-                    align="left"
-                  >
-                    <Box ml={2} mt={1}>
-                      {/* Render the columns filter UI */}
-                      <div>
-                        {column.canFilter ? column.render('Filter') : null}
-                      </div>
-                    </Box>
-                  </th>
-                ))}
+                {headerGroup.headers.map((column) => {
+                  console.log(column);
+                  return (
+                    <th
+                      {...column.getHeaderProps()}
+                      key={'filter' + column.id}
+                      align="left"
+                    >
+                      <Box ml={2} mt={1}>
+                        <div>
+                          {column.canFilter ? column.render('Filter') : null}
+                        </div>
+                      </Box>
+                    </th>
+                  );
+                })}
               </TableRow>
             </Fragment>
           ))}

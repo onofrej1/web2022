@@ -1,7 +1,6 @@
 import React from 'react';
 
-import InputBase from '@mui/material/InputBase';
-import { alpha as fade } from '@mui/material';
+import { alpha as fade, InputBase } from '@mui/material';
 import PropTypes from 'prop-types';
 import SearchIcon from '@mui/icons-material/Search';
 import { makeStyles } from 'tss-react/mui';
@@ -64,7 +63,7 @@ const GlobalFilter = ({
       <InputBase
         value={globalFilter || ''}
         onChange={e => {
-          setGlobalFilter(e.target.value || undefined); // Set undefined to remove the filter entirely
+          setGlobalFilter(e.target.value || undefined);
         }}
         placeholder={`${count} records...`}
         classes={{

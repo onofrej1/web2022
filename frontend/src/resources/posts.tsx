@@ -30,8 +30,9 @@ export default {
     //{ name: 'content', type: 'editor' },
   ],
   list: [
-    { name: 'title', filter: 'range' },
+    //{ name: 'title', filter: 'select' },
     { name: 'text', filter: 'text' },
+    { name: 'views', filter: 'text' },
     {
       name: 'author',
       type: 'foreignKey',
