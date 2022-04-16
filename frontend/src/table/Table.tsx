@@ -1,4 +1,4 @@
-import React, { ChangeEvent, FC, Fragment } from 'react';
+import React, { ChangeEvent, FC, Fragment, useEffect } from 'react';
 
 import Checkbox from '@mui/material/Checkbox';
 import MaUTable from '@mui/material/Table';
@@ -23,7 +23,8 @@ import {
   useSortBy,
   useTable,
 } from 'react-table';
-import { Box, Button } from '@mui/material';
+import { Box, Button, IconButton } from '@mui/material';
+import { useFilter } from './useFilter';
 
 const IndeterminateCheckbox = React.forwardRef<HTMLInputElement, Props>(
   (props: any, ref) => {
@@ -117,6 +118,8 @@ interface Props {
   setData: any;
   updateMyData: any;
   skipPageReset: boolean;
+  filterPosition?: 'table' | 'toolbar';
+  filters: string[];
 }
 
 const Table: FC<Props> = ({
@@ -126,6 +129,8 @@ const Table: FC<Props> = ({
   setData,
   updateMyData,
   skipPageReset,
+  filterPosition = 'toolbar',
+  filters = [],
 }) => {
   const {
     getTableProps,
@@ -154,11 +159,10 @@ const Table: FC<Props> = ({
     useRowSelect,
     (hooks) => {
       hooks.allColumns.push((columns) => {
-        console.log(columns);
+        // works only for server side data
         return [
           {
             id: 'selection',
-            // works only for server side data
             disableFilters: true,
             Filter: () => null,
             Header: ({ getToggleAllRowsSelectedProps }: any) => (
@@ -177,6 +181,11 @@ const Table: FC<Props> = ({
       });
     }
   );
+
+  const { renderFilter, removeAllFilters } = useFilter({filterConfig: filters, headerGroups });
+  useEffect(() => {
+    //removeAllFilters();
+  }, [data, removeAllFilters]);
 
   const handlePageChange = (e: any, newPage: number) => {
     gotoPage(newPage);
@@ -204,17 +213,6 @@ const Table: FC<Props> = ({
     setData(newData);
   };
 
-  const clone = (el: JSX.Element, row: any) => {
-    const elem = { ...el };
-    return React.cloneElement(el, {
-      onClick: (e: React.MouseEvent<HTMLButtonElement> & { row: any }) => {
-        e.row = row;
-        // eslint-disable-next-line prefer-spread
-        elem.props.onClick.apply(elem, [e]);
-      },
-    });
-  };
-
   const useStyles = makeStyles()({
     tableFilter: {
       borderBottom: '1px solid lightgray',
@@ -231,124 +229,138 @@ const Table: FC<Props> = ({
 
   // Render the UI for your table
   return (
-    <TableContainer>
-      <TableToolbar
-        numSelected={Object.keys(selectedRowIds).length}
-        deleteUserHandler={deleteUserHandler}
-        addUserHandler={addUserHandler}
-        preGlobalFilteredRows={preGlobalFilteredRows}
-        setGlobalFilter={setGlobalFilter}
-        globalFilter={globalFilter}
-      />
-      <MaUTable {...getTableProps()}>
-        <TableHead>
-          {headerGroups.map((headerGroup, index) => (
-            <Fragment key={index}>
-              <TableRow
-                {...headerGroup.getHeaderGroupProps()}
-                key={'header_' + index}
-              >
-                {headerGroup.headers.map((column) => (
-                  <TableCell
-                    {...(column.id === 'selection'
-                      ? column.getHeaderProps()
-                      : column.getHeaderProps(column.getSortByToggleProps()))}
-                    key={column.id}
-                  >
-                    {column.render('Header')}
-                    {column.id !== 'selection' ? (
-                      <TableSortLabel
-                        active={column.isSorted}
-                        // react-table has a unsorted state which is not treated here
-                        direction={column.isSortedDesc ? 'desc' : 'asc'}
-                      />
-                    ) : null}
-                  </TableCell>
-                ))}
-              </TableRow>
+    <>
+      {renderFilter()}
 
-              <TableRow
-                {...headerGroup.getHeaderGroupProps()}
-                className={classes.tableFilter}
-                key={'filter_' + index}
-              >
-                {headerGroup.headers.map((column) => {
-                  console.log(column);
-                  return (
-                    <th
-                      {...column.getHeaderProps()}
-                      key={'filter' + column.id}
-                      align="left"
+      <TableContainer>
+        <TableToolbar
+          numSelected={Object.keys(selectedRowIds).length}
+          deleteUserHandler={deleteUserHandler}
+          addUserHandler={addUserHandler}
+          preGlobalFilteredRows={preGlobalFilteredRows}
+          setGlobalFilter={setGlobalFilter}
+          globalFilter={globalFilter}
+        />
+        <MaUTable {...getTableProps()}>
+          <TableHead>
+            {headerGroups.map((headerGroup, index) => (
+              <Fragment key={index}>
+                <TableRow
+                  {...headerGroup.getHeaderGroupProps()}
+                  key={'header_' + index}
+                >
+                  {headerGroup.headers.map((column) => (
+                    <TableCell
+                      {...(column.id === 'selection'
+                        ? column.getHeaderProps()
+                        : column.getHeaderProps(column.getSortByToggleProps()))}
+                      key={column.id}
                     >
-                      <Box ml={2} mt={1}>
-                        <div>
-                          {column.canFilter ? column.render('Filter') : null}
-                        </div>
-                      </Box>
-                    </th>
-                  );
-                })}
-              </TableRow>
-            </Fragment>
-          ))}
-        </TableHead>
-        <TableBody>
-          {page.map((row, index) => {
-            prepareRow(row);
-            return (
-              <TableRow
-                {...row.getRowProps()}
-                className={classes.tableRow}
-                key={index}
-              >
-                {row.cells.map((cell, index) => {
-                  return (
-                    <TableCell {...cell.getCellProps()} key={index}>
-                      {cell.render('Cell')}
+                      {column.render('Header')}
+                      {column.id !== 'selection' ? (
+                        <TableSortLabel
+                          active={column.isSorted}
+                          // react-table has a unsorted state which is not treated here
+                          direction={column.isSortedDesc ? 'desc' : 'asc'}
+                        />
+                      ) : null}
                     </TableCell>
-                  );
-                })}
-                <TableCell key={'action' + index}>
-                  {actions.length ? (
-                    actions.map((action: any, index) => (
-                      <Fragment key={index}>{clone(action, row)}</Fragment>
-                    ))
-                  ) : (
-                    <>
-                      <Button>Edit default</Button>
-                    </>
-                  )}
-                </TableCell>
-              </TableRow>
-            );
-          })}
-        </TableBody>
+                  ))}
+                </TableRow>
 
-        <TableFooter>
-          <TableRow>
-            <TablePagination
-              rowsPerPageOptions={[
-                5,
-                10,
-                25,
-                { label: 'All', value: data.length },
-              ]}
-              colSpan={3}
-              count={data.length}
-              rowsPerPage={pageSize}
-              page={pageIndex}
-              SelectProps={{
-                inputProps: { 'aria-label': 'rows per page' },
-                native: true,
-              }}
-              onPageChange={handlePageChange}
-              onRowsPerPageChange={onRowsPerPageChange}
-              ActionsComponent={TablePaginationActions}
-            />
-          </TableRow>
-        </TableFooter>
-      </MaUTable>
-    </TableContainer>
+                {filterPosition === 'table' && (
+                  <TableRow
+                    {...headerGroup.getHeaderGroupProps()}
+                    className={classes.tableFilter}
+                    key={'filter_' + index}
+                  >
+                    {headerGroup.headers.map((column) => {
+                      console.log(column);
+                      return (
+                        <th
+                          {...column.getHeaderProps()}
+                          key={'filter' + column.id}
+                          align="left"
+                        >
+                          <Box ml={2} mt={1}>
+                            <div>
+                              {column.canFilter
+                                ? column.render('Filter')
+                                : null}
+                            </div>
+                          </Box>
+                        </th>
+                      );
+                    })}
+                  </TableRow>
+                )}
+              </Fragment>
+            ))}
+          </TableHead>
+          <TableBody>
+            {page.map((row, index) => {
+              prepareRow(row);
+              return (
+                <TableRow
+                  {...row.getRowProps()}
+                  className={classes.tableRow}
+                  key={index}
+                >
+                  {row.cells.map((cell, index) => {
+                    return (
+                      <TableCell {...cell.getCellProps()} key={index}>
+                        {cell.render('Cell')}
+                      </TableCell>
+                    );
+                  })}
+                  <TableCell
+                    key={'action' + index}
+                    sx={{ whiteSpace: 'nowrap' }}
+                  >
+                    {actions.map((action: any, index) => (
+                      <Box pr={1} key={index} sx={{ display: 'inline' }}>
+                        <Button
+                          key="cancel"
+                          onClick={(e) => action.action(row, e)}
+                          variant="contained"
+                          color={action.color || 'secondary'}
+                        >
+                          {action.label}
+                        </Button>
+                      </Box>
+                    ))}
+                  </TableCell>
+                </TableRow>
+              );
+            })}
+          </TableBody>
+
+          <TableFooter>
+            <TableRow>
+              <TablePagination
+                rowsPerPageOptions={[
+                  5,
+                  10,
+                  25,
+                  { label: 'All', value: data.length },
+                ]}
+                colSpan={3}
+                count={data.length}
+                rowsPerPage={pageSize}
+                page={pageIndex}
+                SelectProps={{
+                  inputProps: { 'aria-label': 'rows per page' },
+                  native: true,
+                }}
+                onPageChange={handlePageChange}
+                onRowsPerPageChange={onRowsPerPageChange}
+                ActionsComponent={TablePaginationActions}
+              />
+            </TableRow>
+          </TableFooter>
+        </MaUTable>
+      </TableContainer>
+    </>
   );
 };
 

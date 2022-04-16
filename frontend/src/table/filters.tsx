@@ -39,10 +39,10 @@ function SelectFilter({
   column: { filterValue, setFilter, preFilteredRows, id },
 }: any) {
   const options = React.useMemo(() => {
-    const values = new Set<string>();
+    const values = new Set<any>();
     preFilteredRows.forEach((row: any) => values.add(row.values[id]));
     const data = Array.from(values).map((o) => ({ text: o, value: o }));
-    data.unshift({ text: 'All', value: '' });
+    data.unshift({ text: 'All', value: undefined });
     return data;
   }, [id, preFilteredRows]);
 

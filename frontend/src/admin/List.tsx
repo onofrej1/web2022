@@ -1,20 +1,14 @@
 
-import React, { Fragment, useEffect, useState } from 'react';
+import React from 'react';
 import resources from 'resources/index';
 import Table from 'table/Table';
 //import makeData from './makeData';
 import {
   Box,
   Button,
-  Select,
-  Menu,
-  MenuItem,
-  TextField,
-  IconButton,
 } from '@mui/material';
 import settings from 'admin/settings';
 import useFetch from 'use-http';
-import ClearIcon from '@mui/icons-material/Clear';
 import { DefaultFilter, filterGreaterThan, RangeFilter, SelectFilter, SliderFilter } from 'table/filters';
 
 const configKeys: any = {
@@ -45,9 +39,12 @@ const getTableColumns = (resource: string) => {
     return 'Missing list configuration.';
   }
   const columns: any[] = [];
+
   fields.forEach((list: any) => {
     list = mapConfig(list);
     const { name, type } = list;
+    const filter = config.filter.find((f: any) => f.name === name);
+
     let accessor: any = name;
     if (type === 'many2many') {
       accessor = (data: any) => {
@@ -66,9 +63,12 @@ const getTableColumns = (resource: string) => {
     const col: any = {
       Header: name,
       accessor,
-      filter: list.filter ? filters[list.filter][0] : null,
-      Filter: list.filter ? filters[list.filter][1] : () => null,
-      disableFilters: !list.filter,
+      //filter: list.filter ? filters[list.filter][0] : null,
+      //Filter: list.filter ? filters[list.filter][1] : () => null,
+      //disableFilters: !list.filter,
+      filter: filter ? filters[filter.type][0] : null,
+      Filter: filter ? filters[filter.type][1] : () => null,
+      disableFilters: !filter,
     };
     columns.push(col);
   });
@@ -86,7 +86,6 @@ const getTableColumns = (resource: string) => {
 export default function List(props: any) {
   const { resource, dispatch } = props;
   const resourceName = resource.name;
-  const [filters, setFilters] = useState([] as any[]);
   const columns: any = React.useMemo(() => getTableColumns(resourceName), [resourceName]);
   // @ts-ignore
   const config = resources[resourceName];
@@ -94,62 +93,25 @@ export default function List(props: any) {
   const url = `${settings.baseUrl}/${resourceName}`;
   const { data = [], loading, error } = useFetch(url, [url]);
 
-  useEffect(() => {
-    setFilters([]);
-  }, [resourceName]);
-
-  const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
-  const open = Boolean(anchorEl);
-
-  const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
-    setAnchorEl(event.currentTarget);
-  };
-  const addFilter = (filter: any) => {
-    setAnchorEl(null);
-    if (filter.type === 'select') {
-      filter.options = data.map((value: any) => {
-        const option = value[filter.name];
-        return { value: option, text: option };
-      });
-    }
-    filters.push(filter);
-    setFilters(filters);
-  };
-
-  const removeFilter = (filterName: string) => {
-    const newFilters = filters.filter(
-      (filter: any) => filter.name !== filterName
-    );
-    setFilters(newFilters);
-  };
-
-  const handleFilterChange = (e: any) => {
-    const filterName = e.target.name;
-    const filter = filters.find((f) => f.name === filterName);
-    filter.value = e.target.value;
-    setFilters([...filters]);
-  };
-
-  const handleClose = () => {
-    setAnchorEl(null);
-  };
-
   const addItem = () => {
     dispatch({ type: 'showForm' });
   };
 
-  const editItem = (e: any) => {
-    const rowId = e.row.original[settings.primaryKey];
+  const editItem = (row: any) => {
+    const rowId = row.original[settings.primaryKey];
     dispatch({ type: 'showForm', rowId });
   };
 
   const actions = [
-    <Button key="cancel" onClick={editItem} variant="contained" color="secondary">
-      Edit
-    </Button>,
-    <Button key="save" variant="contained" color="primary">
-      Delete
-    </Button>,
+    {
+      label: 'Edit',
+      color: 'primary',
+      action: editItem,
+    },
+    {
+      label: 'Delete',
+      action: () => null,
+    }
   ];
 
   const [tableData, setTableData] = React.useState<any[]>(React.useMemo(() => [], []));
@@ -181,73 +143,12 @@ export default function List(props: any) {
           Add new {config.name}
         </Button>
       </Box>
-      <Box alignItems={'end'}>
-        <Button
-          id="basic-button"
-          aria-controls={open ? 'basic-menu' : undefined}
-          aria-haspopup="true"
-          aria-expanded={open ? 'true' : undefined}
-          onClick={handleClick}
-        >
-          Filter
-        </Button>
-        <Menu
-          id="basic-menu"
-          anchorEl={anchorEl}
-          open={open}
-          onClose={handleClose}
-          MenuListProps={{
-            'aria-labelledby': 'basic-button',
-          }}
-        >
-          {config.filter.map((filter: any) => {
-            return (
-              <MenuItem key={filter.name} onClick={() => addFilter(filter)}>
-                {filter.name}
-              </MenuItem>
-            );
-          })}
-        </Menu>
-      </Box>
-      <Box>
-        {filters.map((filter: any) => {
-          return (
-            <Fragment key={filter.name}>
-              {filter.type === 'text' && (
-                <TextField
-                  name={filter.name}
-                  value={filter.value}
-                  onChange={handleFilterChange}
-                  size="small"
-                ></TextField>
-              )}
-              {filter.type === 'select' && (
-                <Select
-                  size="small"
-                  name={filter.name}
-                  value={filter.value}
-                  onChange={handleFilterChange}
-                  sx={{ minWidth: 120 }}
-                >
-                  {filter.options.map((option: any) => (
-                    <MenuItem key={option.value} value={option.value}>
-                      {option.text}
-                    </MenuItem>
-                  ))}
-                </Select>
-              )}
-              <IconButton onClick={() => removeFilter(filter.name)}>
-                <ClearIcon />
-              </IconButton>
-            </Fragment>
-          );
-        })}
-      </Box>
 
       <Table
         columns={columns}
         data={data}
         actions={actions}
+        filters={config.filter}
         setData={setTableData}
         updateMyData={updateMyData}
         skipPageReset={skipPageReset}

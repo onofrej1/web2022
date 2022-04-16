@@ -3,8 +3,8 @@ export default {
   menuIcon: 'saveIcon',
   resource: 'posts',
   filter: [
-    { name: 'title', type: 'select', op: 'eq', label: 'Title' },
-    { name: 'text', type: 'text', op: 'contains', label: 'Text' },
+    { name: 'title', type: 'select', label: 'Title' },
+    { name: 'text', type: 'text', label: 'Text' },
   ],
   form: [
     { name: 'title', type: 'text' },
@@ -30,13 +30,16 @@ export default {
     //{ name: 'content', type: 'editor' },
   ],
   list: [
-    //{ name: 'title', filter: 'select' },
-    { name: 'text', filter: 'text' },
-    { name: 'views', filter: 'text' },
+    { name: 'title' },
+    { 
+      name: 'text', 
+      //filter: 'text' 
+    },
+    //{ name: 'views', filter: 'text' },
     {
       name: 'author',
       type: 'foreignKey',
-      filter: 'select',
+      //filter: 'select',
       //show: 'last_name',
       render: ({ author }: any) => {
         if (!author) return '';
