@@ -33,7 +33,14 @@ function GlobalFilter({
 
 function DefaultFilter({ column: { filterValue, setFilter, id } }: any) {
   return (
-    <Text id={id} value={filterValue} variant="standard" onChange={setFilter} fullWidth={false} />
+    <Text
+      id={id}
+      label={id}
+      value={filterValue}
+      variant="filled"
+      onChange={setFilter}
+      fullWidth={false}
+    />
   );
 }
 
@@ -51,11 +58,11 @@ function SelectFilter({
   return (
     <Select
       id={id}
+      label={id}
       value={filterValue}
       onChange={setFilter}
       options={options}
-      variant="standard"
-      sx={{ verticalAlign: 'baseline' }}
+      variant="filled"
     ></Select>
   );
 }

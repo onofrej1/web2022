@@ -9,6 +9,8 @@ export interface BaseProps {
   placeholder?: string | undefined;
   value: string;
   onChange: any;
+  variant?: 'filled' | 'outlined' | 'standard';
+  fullWidth?: boolean;
 }
 
 interface FieldProps extends BaseProps {

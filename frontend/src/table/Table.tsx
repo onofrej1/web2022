@@ -23,7 +23,7 @@ import {
   useSortBy,
   useTable,
 } from 'react-table';
-import { Box, Button, IconButton } from '@mui/material';
+import { Box, Button } from '@mui/material';
 import { useFilter } from './useFilter';
 
 const IndeterminateCheckbox = React.forwardRef<HTMLInputElement, Props>(

@@ -10,8 +10,8 @@ import { BaseProps } from './Field';
 
 
 interface Props extends BaseProps {
-  multiple?: boolean;
   options: any[];
+  multiple?: boolean;
   sx?: any;
 }
 
@@ -27,6 +27,7 @@ export const Select: FC<Props> = (props) => {
     <FormControl sx={[...(Array.isArray(sx) ? sx : [sx])]}>
       <InputLabel id="select-label">abcd</InputLabel>
       <MuiSelect
+        fullWidth
         id={name}
         sx={{ minWidth: 120 }}
         labelId="select-label"

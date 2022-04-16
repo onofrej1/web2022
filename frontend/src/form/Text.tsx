@@ -9,7 +9,7 @@ interface Props extends BaseProps {
 }
 
 export const Text: FC<Props> = (props) => {
-  const { name, label, value, variant = 'outlined', type = 'text', min, max, placeholder, onChange } = props;
+  const { name, label, value, variant = 'outlined', fullWidth=true, type = 'text', min, max, placeholder, onChange } = props;
   const handleChange = useCallback(
     (e) => {
       onChange(e.target.value);
@@ -35,6 +35,7 @@ export const Text: FC<Props> = (props) => {
       size="small"
       value={value || ''}
       variant={variant}
+      fullWidth={fullWidth}
     />
   );
 };
