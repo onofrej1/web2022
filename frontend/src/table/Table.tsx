@@ -114,9 +114,7 @@ interface Props {
   columns: any[]; // todo type
   data: any[]; //todo type
   actions: any[]; // todo type
-  setData: any;
-  updateMyData: any;
-  skipPageReset: boolean;
+  skipPageReset?: boolean;
   filterPosition?: 'table' | 'toolbar';
   filters: string[];
 }
@@ -125,8 +123,6 @@ const Table: FC<Props> = ({
   columns,
   data,
   actions,
-  setData,
-  updateMyData,
   skipPageReset,
   filterPosition = 'toolbar',
   filters = [],
@@ -147,9 +143,8 @@ const Table: FC<Props> = ({
       data,
       //defaultColumn,
       autoResetPage: !skipPageReset,
-      // anything we put into these options will automatically be available on the instance.
-      // That way we can call this function from our cell renderer!
-      updateMyData,
+      // anything we put into these options will automatically be available on the instance. That way we can call this function from our cell renderer!
+      //updateMyData,
     },
     useFilters,
     useGlobalFilter,
@@ -194,34 +189,10 @@ const Table: FC<Props> = ({
     setPageSize(Number(e.target.value));
   };
 
-  const removeByIndexs = (array: any[], indexs: any[]) => {
-    array.filter((_, i) => !indexs.includes(i));
-  };
-
-  const deleteUserHandler = () => {
-    const newData = removeByIndexs(
-      data,
-      Object.keys(selectedRowIds).map((x) => parseInt(x, 10))
-    );
-    setData(newData);
-  };
-
-  const addUserHandler = (user: any) => {
-    // @ts-ignore
-    const newData = data.concat([user]);
-    setData(newData);
-  };
-
   const useStyles = makeStyles()({
     tableFilter: {
       borderBottom: '1px solid lightgray',
       lineHeight: '43px !important',
-    },
-    tableRow: {
-      height: '15px !important',
-    },
-    tableCell: {
-      padding: '0px !important',
     },
   });
   const { classes } = useStyles();
@@ -230,12 +201,9 @@ const Table: FC<Props> = ({
   return (
     <>
       {renderFilter()}
-
       <TableContainer>
         <TableToolbar
           numSelected={Object.keys(selectedRowIds).length}
-          deleteUserHandler={deleteUserHandler}
-          addUserHandler={addUserHandler}
           preGlobalFilteredRows={preGlobalFilteredRows}
           setGlobalFilter={setGlobalFilter}
           globalFilter={globalFilter}
@@ -304,7 +272,6 @@ const Table: FC<Props> = ({
               return (
                 <TableRow
                   {...row.getRowProps()}
-                  className={classes.tableRow}
                   key={index}
                 >
                   {row.cells.map((cell, index) => {
@@ -370,9 +337,7 @@ Table.propTypes = {
   columns: PropTypes.array.isRequired,
   data: PropTypes.array.isRequired,
   actions: PropTypes.array.isRequired,
-  updateMyData: PropTypes.func.isRequired,
-  setData: PropTypes.func.isRequired,
-  skipPageReset: PropTypes.bool.isRequired,
+  skipPageReset: PropTypes.bool,
 };
 
 export default Table;

@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import resources from 'resources/index';
 import Table from 'table/Table';
 //import makeData from './makeData';
@@ -89,9 +89,15 @@ export default function List(props: any) {
   const columns: any = React.useMemo(() => getTableColumns(resourceName), [resourceName]);
   // @ts-ignore
   const config = resources[resourceName];
-
   const url = `${settings.baseUrl}/${resourceName}`;
-  const { data = [], loading, error } = useFetch(url, [url]);
+  const { data = [], cache, loading, error } = useFetch(url, [url]);
+
+  useEffect(() => {
+    return () => {
+      cache.clear();
+    };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const addItem = () => {
     dispatch({ type: 'showForm' });
@@ -114,24 +120,7 @@ export default function List(props: any) {
     }
   ];
 
-  const [tableData, setTableData] = React.useState<any[]>(React.useMemo(() => [], []));
-  const [skipPageReset, setSkipPageReset] = React.useState(false);
-
-  const updateMyData = (rowIndex: number, columnId: string, value: string) => {
-    // We also turn on the flag to not reset the page
-    setSkipPageReset(true);
-    setTableData(old =>
-      old.map((row, index) => {
-        if (index === rowIndex) {
-          return {
-            ...old[rowIndex],
-            [columnId]: value,
-          };
-        }
-        return row;
-      })
-    );
-  };
+  //const [skipPageReset, setSkipPageReset] = React.useState(false);
 
   if (loading) return <div>loading...</div>;
   if (error) return <div>{error}</div>;
@@ -149,9 +138,7 @@ export default function List(props: any) {
         data={data}
         actions={actions}
         filters={config.filter}
-        setData={setTableData}
-        updateMyData={updateMyData}
-        skipPageReset={skipPageReset}
+        //skipPageReset={skipPageReset}
       />
 
     </div>

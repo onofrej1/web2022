@@ -18,13 +18,12 @@ interface Props extends BaseProps {
 export const Select: FC<Props> = (props) => {
   const { name, label, value, multiple, variant='outlined', sx, onChange, options = [] } = props;
 
-  const handleChange = (event: SelectChangeEvent) => {
-    console.log(event.target.value);
-    onChange(event.target.value);
+  const handleChange = (e: SelectChangeEvent) => {
+    onChange(e.target.value);
   };
 
   return (
-    <FormControl sx={[...(Array.isArray(sx) ? sx : [sx])]}>
+    <FormControl sx={[ {width: '100%' },...(Array.isArray(sx) ? sx : [sx])]}>
       <InputLabel id="select-label">abcd</InputLabel>
       <MuiSelect
         fullWidth

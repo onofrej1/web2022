@@ -1,4 +1,4 @@
-import React, { Fragment } from 'react';
+import React, { Fragment, useEffect } from 'react';
 import { useAsyncDebounce } from 'react-table';
 import { Text } from 'form/Text';
 import { Select } from 'form/Select';
@@ -32,6 +32,12 @@ function GlobalFilter({
 }
 
 function DefaultFilter({ column: { filterValue, setFilter, id } }: any) {
+  useEffect(() => {
+    return () => {
+      setFilter(undefined);
+    };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
   return (
     <Text
       id={id}
@@ -47,6 +53,13 @@ function DefaultFilter({ column: { filterValue, setFilter, id } }: any) {
 function SelectFilter({
   column: { filterValue, setFilter, preFilteredRows, id },
 }: any) {
+  useEffect(() => {
+    return () => {
+      setFilter(undefined);
+    };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+  
   const options = React.useMemo(() => {
     const values = new Set<any>();
     preFilteredRows.forEach((row: any) => values.add(row.values[id]));
@@ -63,6 +76,7 @@ function SelectFilter({
       onChange={setFilter}
       options={options}
       variant="filled"
+      sx={{ width: 'auto', minWidth: '200px' }}
     ></Select>
   );
 }
@@ -70,6 +84,13 @@ function SelectFilter({
 function SliderFilter({
   column: { filterValue, setFilter, preFilteredRows, id },
 }: any) {
+  useEffect(() => {
+    return () => {
+      setFilter(undefined);
+    };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   const [min, max] = React.useMemo(() => {
     let min = preFilteredRows.length ? preFilteredRows[0].values[id] : 0;
     let max = preFilteredRows.length ? preFilteredRows[0].values[id] : 0;
@@ -100,6 +121,13 @@ function SliderFilter({
 function RangeFilter({
   column: { filterValue = [], preFilteredRows, setFilter, id },
 }: any) {
+  useEffect(() => {
+    return () => {
+      setFilter(undefined);
+    };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   const [min, max] = React.useMemo(() => {
     let min = preFilteredRows.length ? preFilteredRows[0].values[id] : 0;
     let max = preFilteredRows.length ? preFilteredRows[0].values[id] : 0;

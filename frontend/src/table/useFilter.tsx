@@ -66,7 +66,7 @@ const useFilter = (props: any) => {
       </Box>
       {filters.length > 0 &&
         headerGroups.map((headerGroup: any, index: number) => (
-          <Box sx={{ display: 'flex' }}  key={index}>
+          <Box sx={{ display: 'flex', gap: '10px' }}  key={index}>
             {headerGroup.headers.map((column: any) => {
               if (!column.canFilter || !filters.map(f => f.name).includes(column.id)) return null;
               const FilterComponent = column.render('Filter');

@@ -3,11 +3,9 @@ import { Form as AdminForm } from '../form/Form';
 import { useEffect, useState } from 'react';
 import resources from '../resources/index';
 import useFetch from 'use-http';
-import SaveIcon from '@mui/icons-material/Save';
-import CancelIcon from '@mui/icons-material/Cancel';
 import settings from './settings';
 import { getValue } from './utils';
-import { Box, Button } from '@mui/material';
+import { Box } from '@mui/material';
 import { Field } from '../resources/resources.types';
 
 interface Props {
@@ -27,6 +25,7 @@ export const Form: FC<Props> = (props) => {
 
   useEffect(() => {
     async function getData() {
+      console.log('get data');
       const url = `/${resource.name}/${resource.rowId}`;
       const data = await get(url);
 
@@ -56,17 +55,10 @@ export const Form: FC<Props> = (props) => {
     }
     getData();
     getOptions();
-  }, []);
+  }, [formConfig, get, resource.name, resource.rowId]);
 
-  const handleSubmit = async (data: any, e: any) => {
-    const button = e.target;
-
-    if (button.id === 'cancel') {
-      dispatch({ type: 'showList' });
-      return;
-    }
+  const saveData = async (data: any) => {
     console.log(data);
-
     if (data.pk) {
       const url = `/${resource.name}/${resource.rowId}/`;
       await patch(url, data);
@@ -74,27 +66,26 @@ export const Form: FC<Props> = (props) => {
       const url = `/${resource.name}`;
       await post(url, data);
     }
-
-    if (button.id === 'save-and-close') {
-      dispatch({ type: 'showList' });
-    }
   };
-
+  
   const actions = [
-    <Button key="cancel" variant="contained" id="cancel" color="secondary">
-      <CancelIcon fontSize="small" /> Cancel
-    </Button>,
-    <Button key="save" variant="contained" id="save" color="primary">
-      <SaveIcon fontSize="small" /> Save
-    </Button>,
-    <Button
-      key="save-and-close"
-      variant="contained"
-      id="save-and-close"
-      color="primary"
-    >
-      <SaveIcon fontSize="small" /> Save and close
-    </Button>,
+    {
+      label: 'Cancel',
+      color: 'secondary',
+      action: () => dispatch({ type: 'showList' }),
+    },
+    {
+      label: 'Save',
+      action: saveData,
+    },
+    {
+      label: 'Save & close',
+      color: 'secondary',
+      action: async (data: any) => {
+        await saveData(data);
+        dispatch({ type: 'showList' });
+      },
+    }
   ];
 
   if (loading || !data) return <div>Loading...</div>;
@@ -103,7 +94,6 @@ export const Form: FC<Props> = (props) => {
   return (
     <Box p={2}>
       <AdminForm
-        handleSubmit={handleSubmit}
         fields={fields}
         actions={actions}
         data={data}
