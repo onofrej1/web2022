@@ -1,5 +1,5 @@
 import React, { Fragment, useState } from 'react';
-import { Box, Button, IconButton, Menu, MenuItem } from '@mui/material';
+import { Box, Button, Grid, IconButton, Menu, MenuItem } from '@mui/material';
 import ClearIcon from '@mui/icons-material/Clear';
 
 const useFilter = (props: any) => {
@@ -64,24 +64,22 @@ const useFilter = (props: any) => {
           })}
         </Menu>
       </Box>
-      {filters.length &&
+      {filters.length > 0 &&
         headerGroups.map((headerGroup: any, index: number) => (
-          <>
+          <Fragment key={index}>
             {headerGroup.headers.map((column: any) => {
               if (!filters.map(f => f.name).includes(column.id)) return null;
 
               return (
-                <Box sx={{ ml: 2, mt: 1 }} key={column.id}>
-                  <div>
-                    {column.canFilter ? column.render('Filter') : null}
-                    <IconButton onClick={() => removeFilter(column.id)}>
-                      <ClearIcon />
-                    </IconButton>
-                  </div>
+                <Box sx={{ ml: 2, display: 'inline-block' }} key={column.id}>
+                  {column.canFilter ? column.render('Filter') : null}
+                  <IconButton onClick={() => removeFilter(column.id)}>
+                    <ClearIcon />
+                  </IconButton>
                 </Box>
               );
             })}
-          </>
+          </Fragment>
         ))}
     </>
   );

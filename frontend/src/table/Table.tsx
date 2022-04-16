@@ -28,7 +28,6 @@ import { useFilter } from './useFilter';
 
 const IndeterminateCheckbox = React.forwardRef<HTMLInputElement, Props>(
   (props: any, ref) => {
-    console.log(props);
     // eslint-disable-next-line react/prop-types
     const { indeterminate, ...rest } = props;
     const defaultRef = React.useRef();
@@ -167,12 +166,12 @@ const Table: FC<Props> = ({
             Filter: () => null,
             Header: ({ getToggleAllRowsSelectedProps }: any) => (
               <div>
-                <IndeterminateCheckbox {...getToggleAllRowsSelectedProps()} />
+                <IndeterminateCheckbox {...getToggleAllRowsSelectedProps()} sx={{ padding: 0 }} />
               </div>
             ),
             Cell: ({ row }: any) => (
               <div>
-                <IndeterminateCheckbox {...row.getToggleRowSelectedProps()} />
+                <IndeterminateCheckbox {...row.getToggleRowSelectedProps()} sx={{ padding: 0 }} />
               </div>
             ),
           },
@@ -255,6 +254,7 @@ const Table: FC<Props> = ({
                         ? column.getHeaderProps()
                         : column.getHeaderProps(column.getSortByToggleProps()))}
                       key={column.id}
+                      sx={{ padding: '10px' }}
                     >
                       {column.render('Header')}
                       {column.id !== 'selection' ? (
@@ -266,6 +266,7 @@ const Table: FC<Props> = ({
                       ) : null}
                     </TableCell>
                   ))}
+                  <TableCell sx={{ padding: '10px' }}>Actions</TableCell>
                 </TableRow>
 
                 {filterPosition === 'table' && (
@@ -308,14 +309,14 @@ const Table: FC<Props> = ({
                 >
                   {row.cells.map((cell, index) => {
                     return (
-                      <TableCell {...cell.getCellProps()} key={index}>
+                      <TableCell {...cell.getCellProps()} key={index} sx={{ padding: '10px' }}>
                         {cell.render('Cell')}
                       </TableCell>
                     );
                   })}
                   <TableCell
                     key={'action' + index}
-                    sx={{ whiteSpace: 'nowrap' }}
+                    sx={{ whiteSpace: 'nowrap', padding: '10px' }}
                   >
                     {actions.map((action: any, index) => (
                       <Box pr={1} key={index} sx={{ display: 'inline' }}>
@@ -323,6 +324,7 @@ const Table: FC<Props> = ({
                           key="cancel"
                           onClick={(e) => action.action(row, e)}
                           variant="contained"
+                          size="small"
                           color={action.color || 'secondary'}
                         >
                           {action.label}

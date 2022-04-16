@@ -32,7 +32,9 @@ function GlobalFilter({
 }
 
 function DefaultFilter({ column: { filterValue, setFilter, id } }: any) {
-  return <Text id={id} value={filterValue} onChange={setFilter} />;
+  return (
+    <Text id={id} value={filterValue} variant="standard" onChange={setFilter} fullWidth={false} />
+  );
 }
 
 function SelectFilter({
@@ -52,6 +54,8 @@ function SelectFilter({
       value={filterValue}
       onChange={setFilter}
       options={options}
+      variant="standard"
+      sx={{ verticalAlign: 'baseline' }}
     ></Select>
   );
 }
@@ -72,6 +76,7 @@ function SliderFilter({
   return (
     <>
       <Text
+        variant="standard"
         type="range"
         min={min}
         max={max}

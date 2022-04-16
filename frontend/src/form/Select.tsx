@@ -8,18 +8,15 @@ import {
 } from '@mui/material';
 import { BaseProps } from './Field';
 
-const formControl = {
-  //minWidth: 120,
-  width: '100%',
-};
 
 interface Props extends BaseProps {
   multiple?: boolean;
   options: any[];
+  sx?: any;
 }
 
 export const Select: FC<Props> = (props) => {
-  const { name, label, value, multiple, onChange, options = [] } = props;
+  const { name, label, value, multiple, variant='outlined', sx, onChange, options = [] } = props;
 
   const handleChange = (event: SelectChangeEvent) => {
     console.log(event.target.value);
@@ -27,15 +24,19 @@ export const Select: FC<Props> = (props) => {
   };
 
   return (
-    <FormControl sx={formControl}>
-      <InputLabel>{label}</InputLabel>
+    <FormControl sx={[...(Array.isArray(sx) ? sx : [sx])]}>
+      <InputLabel id="select-label">abcd</InputLabel>
       <MuiSelect
+        id={name}
+        sx={{ minWidth: 120 }}
+        labelId="select-label"
         name={name}
         size="small"
         value={value}
         label={label}
         onChange={handleChange}
         multiple={multiple}
+        variant={variant}
       >
         {options.map((option: any) => (
           <MenuItem key={option.value} value={option.value}>

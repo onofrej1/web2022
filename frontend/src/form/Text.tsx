@@ -9,10 +9,10 @@ interface Props extends BaseProps {
 }
 
 export const Text: FC<Props> = (props) => {
-  const { name, label, value, type = 'text', min, max, placeholder, onChange } = props;
+  const { name, label, value, variant = 'outlined', type = 'text', min, max, placeholder, onChange } = props;
   const handleChange = useCallback(
-    (event) => {
-      onChange(event.target.value);
+    (e) => {
+      onChange(e.target.value);
     },
     [onChange]
   );
@@ -26,7 +26,6 @@ export const Text: FC<Props> = (props) => {
 
   return (
     <TextField
-      fullWidth
       label={label}
       type={type}
       placeholder={placeholder}
@@ -35,7 +34,7 @@ export const Text: FC<Props> = (props) => {
       onChange={handleChange}
       size="small"
       value={value || ''}
-      variant="outlined"
+      variant={variant}
     />
   );
 };
