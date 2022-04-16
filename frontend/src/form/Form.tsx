@@ -24,11 +24,9 @@ export const Form: FC<Props> = (props) => {
   const [data, setData] = useState(defaultData);
   console.log(data);
 
-  const updateValue = useCallback(
+  const updateField = useCallback(
     (name: string) => {
-      console.log('update'+name);
       return (value: string) => {
-        console.log('update'+value);
         setData({
           ...data,
           [name]: value,
@@ -56,12 +54,12 @@ export const Form: FC<Props> = (props) => {
               <Field
                 {...field}
                 value={value}
-                onChange={updateValue(fieldName)}
+                onChange={updateField(fieldName)}
               />
             </Box>
           );
         })}
-        <Grid container>
+        <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: '5px'}}>
           {actions.length ? (
             actions.map((action: any, index) => (
               <Button
@@ -70,7 +68,10 @@ export const Form: FC<Props> = (props) => {
                 variant="contained"
                 color={action.color}
               >
-                <SaveIcon fontSize="small" /> {action.label}
+                {action.icon === 'save' && <SaveIcon fontSize="small" />}
+                {action.icon === 'savexx' && <SaveIcon fontSize="small" />}
+                {action.icon === 'cancel' && <CancelIcon fontSize="small" />}
+                {action.label}
               </Button>
             ))
           ) : (
@@ -80,10 +81,10 @@ export const Form: FC<Props> = (props) => {
               </Button>
             </>
           )}
-        </Grid>
+        </Box>
       </form>
 
-      <code>{JSON.stringify(data, null, 4)}</code>
+      <p><code>{JSON.stringify(data, null, 4)}</code></p>
     </Box>
   );
 };

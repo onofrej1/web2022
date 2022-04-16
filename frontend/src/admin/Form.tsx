@@ -13,6 +13,16 @@ interface Props {
   dispatch: any;
 }
 
+const mapFieldOptions = (field: any, options: any[]) => {
+  return options.map((option: any) => {
+    const text = field.render
+      ? field.render(option)
+      : option[field.textField];
+    const value = option[field.valueField];
+    return { text, value };
+  });
+};
+
 export const Form: FC<Props> = (props) => {
   const { resource, dispatch } = props;
   const { get, post, patch, loading, error } = useFetch(settings.baseUrl);
@@ -25,7 +35,6 @@ export const Form: FC<Props> = (props) => {
 
   useEffect(() => {
     async function getData() {
-      console.log('get data');
       const url = `/${resource.name}/${resource.rowId}`;
       const data = await get(url);
 
@@ -34,26 +43,24 @@ export const Form: FC<Props> = (props) => {
       });
       setData(data);
     }
+    
     async function getOptions() {
       for (const field of formConfig) {
         if (
           ['foreignKey', 'many2many'].includes(field.type) &&
           field.resource
         ) {
-          let options = await get(`/${field.resource}`);
-          options = options.map((option: any) => {
-            const text = field.render
-              ? field.render(option)
-              : option[field.textField];
-            const value = option[field.valueField];
-            return { text, value };
-          });
-          field.options = options;
+          const options = await get(`/${field.resource}`);
+          field.options = mapFieldOptions(field, options);
         }
       }
       setFields(formConfig);
     }
-    getData();
+    if (resource.rowId) {
+      getData();
+    } else {
+      setData({} as any);
+    }
     getOptions();
   }, [formConfig, get, resource.name, resource.rowId]);
 
@@ -62,9 +69,11 @@ export const Form: FC<Props> = (props) => {
     if (data.pk) {
       const url = `/${resource.name}/${resource.rowId}/`;
       await patch(url, data);
+      setData(data);
     } else {
-      const url = `/${resource.name}`;
+      const url = `/${resource.name}/`;
       await post(url, data);
+      setData(data);
     }
   };
   
@@ -72,14 +81,18 @@ export const Form: FC<Props> = (props) => {
     {
       label: 'Cancel',
       color: 'secondary',
+      icon: 'cancel',
       action: () => dispatch({ type: 'showList' }),
     },
     {
       label: 'Save',
+      icon: 'save',
+      color: 'primary',
       action: saveData,
     },
     {
       label: 'Save & close',
+      icon: 'save',
       color: 'secondary',
       action: async (data: any) => {
         await saveData(data);

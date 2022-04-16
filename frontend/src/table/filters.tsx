@@ -171,8 +171,6 @@ function RangeFilter({
 
 // Add new filter or override existing filters, use with UseMemo
 const filterTypes = {
-  test: () => {},
-  // Add a new fuzzyTextFilterFn filter type.
   //fuzzyText: fuzzyTextFilterFn,
 };
 

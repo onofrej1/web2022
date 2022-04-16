@@ -24,7 +24,7 @@ export const Select: FC<Props> = (props) => {
 
   return (
     <FormControl sx={[ {width: '100%' },...(Array.isArray(sx) ? sx : [sx])]}>
-      <InputLabel id="select-label">abcd</InputLabel>
+      <InputLabel id="select-label">{label}</InputLabel>
       <MuiSelect
         fullWidth
         id={name}
