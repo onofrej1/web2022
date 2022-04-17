@@ -36,7 +36,7 @@ const useFilter = (props: any) => {
 
   const renderFilter = () => (
     <>
-      <Box alignItems={'end'}>
+      <Box component="div">
         <Button
           id="basic-button"
           aria-controls={open ? 'basic-menu' : undefined}
@@ -44,7 +44,7 @@ const useFilter = (props: any) => {
           aria-expanded={open ? 'true' : undefined}
           onClick={handleClick}
         >
-          Filter
+          <ClearIcon /> Filter
         </Button>
         <Menu
           id="basic-menu"
@@ -64,9 +64,10 @@ const useFilter = (props: any) => {
           })}
         </Menu>
       </Box>
+      <div></div>
       {filters.length > 0 &&
         headerGroups.map((headerGroup: any, index: number) => (
-          <Box sx={{ display: 'flex', gap: '10px' }}  key={index}>
+          <Box sx={{ display: 'flex', gap: '10px', justifyContent: 'flex-end' }}  key={index}>
             {headerGroup.headers.map((column: any) => {
               if (!column.canFilter || !filters.map(f => f.name).includes(column.id)) return null;
               const FilterComponent = column.render('Filter');

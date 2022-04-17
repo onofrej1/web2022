@@ -48,68 +48,6 @@ const IndeterminateCheckbox = React.forwardRef<HTMLInputElement, Props>(
 );
 IndeterminateCheckbox.displayName = 'IndeterminateCheckboxDisplayName';
 
-const inputStyle = {
-  padding: 0,
-  margin: 0,
-  border: 0,
-  background: 'transparent',
-};
-
-interface EditableCellProps {
-  value: any;
-  row: any;
-  column: any;
-  updateMyData: any;
-}
-
-const EditableCell = ({
-  value: initialValue,
-  row: { index },
-  column: { id },
-  updateMyData, // This is a custom function that we supplied to our table instance
-}: EditableCellProps) => {
-  const [value, setValue] = React.useState(initialValue);
-
-  const onChange = (e: ChangeEvent<HTMLInputElement>) => {
-    setValue(e.target.value);
-  };
-
-  const onBlur = () => {
-    updateMyData(index, id, value);
-  };
-
-  React.useEffect(() => {
-    setValue(initialValue);
-  }, [initialValue]);
-
-  return (
-    <input
-      style={inputStyle}
-      value={value || ''}
-      onChange={onChange}
-      onBlur={onBlur}
-    />
-  );
-};
-
-EditableCell.propTypes = {
-  cell: PropTypes.shape({
-    value: PropTypes.any, //.isRequired,
-  }),
-  row: PropTypes.shape({
-    index: PropTypes.number.isRequired,
-  }),
-  column: PropTypes.shape({
-    id: PropTypes.string.isRequired,
-  }),
-  updateMyData: PropTypes.func.isRequired,
-};
-
-// Set our editable cell renderer as the default Cell renderer
-const defaultColumn = {
-  Cell: EditableCell,
-};
-
 interface Props {
   columns: any[]; // todo type
   data: any[]; //todo type
@@ -176,6 +114,7 @@ const Table: FC<Props> = ({
     }
   );
 
+  const rowPadding = '8px';
   const { renderFilter, removeAllFilters } = useFilter({filterConfig: filters, headerGroups });
   useEffect(() => {
     //removeAllFilters();
@@ -197,10 +136,11 @@ const Table: FC<Props> = ({
   });
   const { classes } = useStyles();
 
-  // Render the UI for your table
   return (
     <>
-      {renderFilter()}
+      <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
+        {renderFilter()}
+      </Box>
       <TableContainer>
         <TableToolbar
           numSelected={Object.keys(selectedRowIds).length}
@@ -222,19 +162,18 @@ const Table: FC<Props> = ({
                         ? column.getHeaderProps()
                         : column.getHeaderProps(column.getSortByToggleProps()))}
                       key={column.id}
-                      sx={{ padding: '10px' }}
+                      sx={{ padding: rowPadding }}
                     >
                       {column.render('Header')}
                       {column.id !== 'selection' ? (
                         <TableSortLabel
                           active={column.isSorted}
-                          // react-table has a unsorted state which is not treated here
                           direction={column.isSortedDesc ? 'desc' : 'asc'}
                         />
                       ) : null}
                     </TableCell>
                   ))}
-                  <TableCell sx={{ padding: '10px' }}>Actions</TableCell>
+                  <TableCell sx={{ padding: rowPadding }}>Actions</TableCell>
                 </TableRow>
 
                 {filterPosition === 'table' && (
@@ -244,7 +183,6 @@ const Table: FC<Props> = ({
                     key={'filter_' + index}
                   >
                     {headerGroup.headers.map((column) => {
-                      console.log(column);
                       return (
                         <th
                           {...column.getHeaderProps()}
@@ -276,14 +214,14 @@ const Table: FC<Props> = ({
                 >
                   {row.cells.map((cell, index) => {
                     return (
-                      <TableCell {...cell.getCellProps()} key={index} sx={{ padding: '10px' }}>
+                      <TableCell {...cell.getCellProps()} key={index} sx={{ padding: rowPadding }}>
                         {cell.render('Cell')}
                       </TableCell>
                     );
                   })}
                   <TableCell
                     key={'action' + index}
-                    sx={{ whiteSpace: 'nowrap', padding: '10px' }}
+                    sx={{ whiteSpace: 'nowrap', padding: rowPadding }}
                   >
                     {actions.map((action: any, index) => (
                       <Box pr={1} key={index} sx={{ display: 'inline' }}>

@@ -1,3 +1,4 @@
+import { Box } from '@mui/material';
 import React, { FC } from 'react';
 import { Select } from './Select';
 import { Text } from './Text';
@@ -45,9 +46,9 @@ export const Field: FC<FieldProps> = (props) => {
   const Component = components[type];
 
   return (
-    <div className="field mb-4 mt-4">
-      <div className="field__input">{<Component {...componentProps} />}</div>
-      {<div className="field__help">{helpText}</div>}
-    </div>
+    <Box sx={{ my: 3 }}>
+      {<Component {...componentProps} />}
+      <div className="help">{helpText}</div>
+    </Box>
   );
 };

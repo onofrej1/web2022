@@ -16,15 +16,15 @@ interface Props extends BaseProps {
 }
 
 export const Select: FC<Props> = (props) => {
-  const { name, label, value, multiple, variant='outlined', sx, onChange, options = [] } = props;
-
+  const { name, value, label, multiple, variant='outlined', sx, onChange, options = [] } = props;
+  const fieldValue: any = !value && multiple ? [] : value;
   const handleChange = (e: SelectChangeEvent) => {
     onChange(e.target.value);
   };
 
   return (
     <FormControl sx={[ {width: '100%' },...(Array.isArray(sx) ? sx : [sx])]}>
-      <InputLabel id="select-label">{label}</InputLabel>
+      <InputLabel shrink id="select-label">{label}</InputLabel>
       <MuiSelect
         fullWidth
         id={name}
@@ -32,7 +32,7 @@ export const Select: FC<Props> = (props) => {
         labelId="select-label"
         name={name}
         size="small"
-        value={value}
+        value={fieldValue}
         label={label}
         onChange={handleChange}
         multiple={multiple}
