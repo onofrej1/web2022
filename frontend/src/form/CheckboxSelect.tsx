@@ -40,15 +40,16 @@ export const CheckboxSelect: FC<Props> = (props) => {
   };
 
   return (
-    <FormControl sx={{ width: '100%' }}>
-      <InputLabel shrink id="mutiple-select-label">{label}</InputLabel>
+    <FormControl fullWidth variant="outlined">
+      <InputLabel shrink id="select-label">{label}</InputLabel>
       <Select
         id={name}
         size="small"
-        labelId="mutiple-select-label"
+        labelId="select-label"
+        label={label}
         multiple
         variant={variant}
-        value={value}
+        value={value || []}
         onChange={handleChange}
         renderValue={renderValue}
         // MenuProps={MenuProps}

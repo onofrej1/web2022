@@ -8,6 +8,7 @@ export default {
   ],
   form: [
     { name: 'title', type: 'text' },
+    { name: 'views', type: 'text'},
     {
       name: 'author',
       type: 'foreignKey',

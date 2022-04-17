@@ -24,7 +24,7 @@ const Admin = (props: any) => {
         routes={routes}
         dashboard={dashboard}
         layout={layout}
-        theme={theme}
+        //theme={theme}
         title={title}
         //{...props}
       >
