@@ -101,7 +101,7 @@ export const Form: FC<Props> = (props) => {
     }
   ];
 
-  if (loading || !data) return <div>Loading...</div>;
+  if (!data) return null;
   if (error) return <div>{error}</div>;
 
   return (

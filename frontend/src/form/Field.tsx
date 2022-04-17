@@ -1,6 +1,7 @@
 import { Box } from '@mui/material';
 import React, { FC } from 'react';
 import { Select } from './Select';
+import { CheckboxSelect } from './CheckboxSelect';
 import { Text } from './Text';
 
 export interface BaseProps {
@@ -8,7 +9,7 @@ export interface BaseProps {
   name?: string;
   label?: string;
   placeholder?: string | undefined;
-  value: string;
+  value: any;
   onChange: any;
   variant?: 'filled' | 'outlined' | 'standard';
   fullWidth?: boolean;
@@ -40,7 +41,7 @@ export const Field: FC<FieldProps> = (props) => {
     text: Text,
     select: Select,
     foreignKey: Select,
-    many2many: Select,
+    many2many: CheckboxSelect,
   };
 
   const Component = components[type];

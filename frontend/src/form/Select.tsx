@@ -16,8 +16,7 @@ interface Props extends BaseProps {
 }
 
 export const Select: FC<Props> = (props) => {
-  const { name, value, label, multiple, variant='outlined', sx, onChange, options = [] } = props;
-  const fieldValue: any = !value && multiple ? [] : value;
+  const { name, value, label, variant='outlined', sx, onChange, options = [] } = props;
   const handleChange = (e: SelectChangeEvent) => {
     onChange(e.target.value);
   };
@@ -32,10 +31,9 @@ export const Select: FC<Props> = (props) => {
         labelId="select-label"
         name={name}
         size="small"
-        value={fieldValue}
+        value={value}
         label={label}
         onChange={handleChange}
-        multiple={multiple}
         variant={variant}
       >
         {options.map((option: any) => (
