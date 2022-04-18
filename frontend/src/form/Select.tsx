@@ -22,11 +22,12 @@ export const Select: FC<Props> = (props) => {
   };
 
   return (
-    <FormControl sx={[ {width: '100%' },...(Array.isArray(sx) ? sx : [sx])]}>
+    <FormControl fullWidth sx={[...(Array.isArray(sx) ? sx : [sx])]}>
       <InputLabel shrink id="select-label">{label}</InputLabel>
       <MuiSelect
         fullWidth
         id={name}
+        displayEmpty
         sx={{ minWidth: 120 }}
         labelId="select-label"
         name={name}

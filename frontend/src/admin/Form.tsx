@@ -14,13 +14,15 @@ interface Props {
 }
 
 const mapFieldOptions = (field: any, options: any[]) => {
-  return options.map((option: any) => {
+  options = options.map((option: any) => {
     const text = field.render
       ? field.render(option)
       : option[field.textField];
     const value = option[field.valueField];
     return { text, value };
   });
+  options.unshift({ text: '--Choose--', value: '' });
+  return options;
 };
 
 export const Form: FC<Props> = (props) => {
@@ -66,6 +68,19 @@ export const Form: FC<Props> = (props) => {
 
   const saveData = async (data: any) => {
     console.log(data);
+
+    // for django rest framework PrimaryKeyRelatedField
+    for (const field of formConfig) {
+      if (field.type === 'foreignKey') {
+        data[field.name+'_id'] = data[field.name] || null;
+        delete data[field.name];
+      }
+      if (field.type === 'many2many') {
+        data[field.name+'_idset'] = data[field.name] || [];
+        delete data[field.name];
+      }
+    }
+
     if (data.pk) {
       const url = `/${resource.name}/${resource.rowId}/`;
       await patch(url, data);
