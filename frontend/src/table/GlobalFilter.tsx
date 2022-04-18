@@ -21,7 +21,7 @@ const GlobalFilter = ({
   const Filter = (
     <Box>
       <Text
-        variant="standard"
+        variant="filled"
         value={globalFilter || ''}
         onChange={(value: string) => {
           setGlobalFilter(value || undefined);

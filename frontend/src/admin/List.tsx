@@ -123,7 +123,7 @@ export default function List(props: any) {
   //const [skipPageReset, setSkipPageReset] = React.useState(false);
 
   const addNewItem = () => (
-    <Box>
+    <Box ml={2} mb={2}>
       <Button variant="contained" onClick={addItem} color="primary">
         Add new {config.name}
       </Button>

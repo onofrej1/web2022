@@ -69,7 +69,7 @@ export const Form: FC<Props> = (props) => {
   const saveData = async (data: any) => {
     console.log(data);
 
-    // for django rest framework PrimaryKeyRelatedField
+    // set relation fields for django rest framework
     for (const field of formConfig) {
       if (field.type === 'foreignKey') {
         data[field.name+'_id'] = data[field.name] || null;

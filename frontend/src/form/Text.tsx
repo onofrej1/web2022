@@ -6,7 +6,7 @@ interface Props extends BaseProps {
   type?: string;
   min?: number;
   max?: number;
-  InputProps?: any;
+  InputProps?: any; // move to baseProps ?
 }
 
 export const Text: FC<Props> = (props) => {

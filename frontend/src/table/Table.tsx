@@ -11,12 +11,14 @@ import {
   TableRow,
   TableSortLabel,
   TableContainer,
+  Typography,
 } from '@mui/material';
 
 import PropTypes from 'prop-types';
 import TableToolbar from 'table/TableToolbar';
 import TablePaginationActions from 'table/TablePaginationActions';
 import GlobalFilter from 'table/GlobalFilter';
+import GetAppIcon from '@mui/icons-material/GetApp';
 
 import {
   useFilters,
@@ -142,6 +144,16 @@ const Table: FC<Props> = ({
     setPageSize(Number(e.target.value));
   };
 
+  const toolbarRight = () => (
+    <Box sx={{ display: 'flex', gap: 2, mr: 2 }}>
+      {renderFilter()}
+      <Box sx={{ display: 'flex', padding: 0.8 }}>
+        <GetAppIcon color="primary" />
+        <Typography component="span" color="primary">EXPORT</Typography>
+      </Box>
+    </Box>
+  );
+
   /*{numSelected > 0 ? (
     <Typography color="inherit" variant="subtitle1">
       {numSelected} selected
@@ -151,16 +163,16 @@ const Table: FC<Props> = ({
   return (
     <>
       <TableContainer>
-        {/* portal element */}
+        {/* portal element replacing "id='table-search'" element in page layout */}
         <GlobalFilter
           preGlobalFilteredRows={preGlobalFilteredRows}
           globalFilter={globalFilter}
           setGlobalFilter={setGlobalFilter}
         />
         <TableToolbar
-          slots={{
+          toolbar={{
             left: toolbar ? toolbar.left() : '',
-            right: renderFilter(),
+            right: toolbarRight(),
           }}
         />
         <MuiTable {...getTableProps()}>
@@ -258,7 +270,7 @@ const Table: FC<Props> = ({
           </TableBody>
 
           <TableFooter>
-            <TableRow sx={{ align: 'center'}}>
+            <TableRow sx={{ align: 'center' }}>
               <TablePagination
                 rowsPerPageOptions={[5, 10, 25, { label: 'All', value: -1 }]}
                 colSpan={headerGroups[0].headers.length + 1}

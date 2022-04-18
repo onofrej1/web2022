@@ -59,7 +59,7 @@ export const Resources = () => {
               {config.name} list
             </Typography>
           </Box>
-          <Box sx={{ m: 2, mt: 3, width: '200px' }} id="table-search"></Box>
+          <Box sx={{ m: 2, mt: 3, width: '300px' }} id="table-search"></Box>
         </Box>
         <List resource={state} dispatch={dispatch} />
       </>}
