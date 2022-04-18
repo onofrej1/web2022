@@ -1,4 +1,4 @@
-import React, { ChangeEvent, FC, Fragment, useEffect } from 'react';
+import React, { ChangeEvent, FC, Fragment, useEffect, useRef } from 'react';
 
 import {
   Checkbox,
@@ -30,6 +30,7 @@ import {
 } from 'react-table';
 import { Box, Button } from '@mui/material';
 import { useFilter } from './useFilter';
+import { useTablePagination } from './useTablePagination';
 
 const IndeterminateCheckbox = React.forwardRef<HTMLInputElement, Props>(
   (props: any, ref) => {
@@ -55,12 +56,15 @@ IndeterminateCheckbox.displayName = 'IndeterminateCheckboxDisplayName';
 
 interface Props {
   columns: any[]; // todo type
-  data: any[]; //todo type
+  data: any; //todo type
   actions: any[]; // todo type
   skipPageReset?: boolean;
   toolbar: any;
   filterPosition?: 'table' | 'toolbar';
   filters: string[];
+  //page: number;
+  //setPage: any;
+  pagination: any;
 }
 
 const Table: FC<Props> = ({
@@ -71,25 +75,48 @@ const Table: FC<Props> = ({
   filterPosition = 'toolbar',
   filters = [],
   toolbar,
+  pagination: { page: queryPageIndex, setPage, pageSize: queryPageSize },
 }) => {
+  console.log(data);
+  /*const {
+    //queryPageIndex,
+    //queryPageSize,
+    //dispatch,
+    PAGE_CHANGED,
+    PAGE_SIZE_CHANGED,
+    TOTAL_COUNT_CHANGED,
+  } = useTablePagination();*/
   const {
     getTableProps,
     headerGroups,
     prepareRow,
-    page,
+    page: pageData,
+    //page,
+    canPreviousPage,
+    canNextPage,
+    pageOptions,
+    pageCount,
     gotoPage,
+    nextPage,
+    previousPage,
     setPageSize,
     preGlobalFilteredRows,
     setGlobalFilter,
-    state: { pageIndex, pageSize, selectedRowIds, globalFilter },
+    state: { pageIndex, pageSize, /*selectedRowIds,*/ globalFilter },
   } = useTable(
     {
       columns,
-      data,
-      //defaultColumn,
+      data: data && data.results ? data.results : [],
+      initialState: {
+        pageIndex: queryPageIndex,
+        pageSize: queryPageSize,
+      },
+      manualPagination: true,
+      pageCount: data.count && data.count > 0 ? Math.ceil(data.count / queryPageSize) : undefined,
       autoResetPage: !skipPageReset,
       // anything we put into these options will automatically be available on the instance. That way we can call this function from our cell renderer!
       //updateMyData,
+      //defaultColumn,
     },
     useFilters,
     useGlobalFilter,
@@ -126,6 +153,7 @@ const Table: FC<Props> = ({
       });
     }
   );
+  console.log(pageSize);
 
   const rowPadding = '8px';
   const { renderFilter, removeAllFilters } = useFilter({
@@ -136,15 +164,29 @@ const Table: FC<Props> = ({
     //removeAllFilters();
   }, [data, removeAllFilters]);
 
-  const handlePageChange = (e: any, newPage: number) => {
-    gotoPage(newPage);
-  };
+  useEffect(() => {
+    setPage(pageIndex);
+  }, [pageIndex, setPage]);
 
-  const onRowsPerPageChange = (e: ChangeEvent<HTMLInputElement>) => {
-    setPageSize(Number(e.target.value));
-  };
+  useEffect(() => {
+    console.log(pageIndex);
+    console.log(pageSize);
+    if (pageIndex !== 1) {
+      console.log('go to page 1');
+      gotoPage(1);
+    }
+  }, [pageSize]);
 
-  const toolbarRight = () => (
+  /*useEffect(() => {
+    if (data?.count) {
+      dispatch({
+        type: TOTAL_COUNT_CHANGED,
+        payload: data.count,
+      });
+    }
+  }, [TOTAL_COUNT_CHANGED, data.count, dispatch]);*/
+
+  const toolbarTopRight = () => (
     <Box sx={{ display: 'flex', gap: 2, mr: 2 }}>
       {renderFilter()}
       <Box sx={{ display: 'flex', padding: 0.8 }}>
@@ -173,8 +215,8 @@ const Table: FC<Props> = ({
         />
         <TableToolbar
           toolbar={{
-            left: toolbar ? toolbar.left() : '',
-            right: toolbarRight(),
+            left: toolbar ? toolbar.topLeft() : '',
+            right: toolbarTopRight(),
           }}
         />
         <MuiTable {...getTableProps()}>
@@ -233,7 +275,7 @@ const Table: FC<Props> = ({
             ))}
           </TableHead>
           <TableBody>
-            {page.map((row, index) => {
+            {pageData.map((row, index) => {
               prepareRow(row);
               return (
                 <TableRow {...row.getRowProps()} key={index}>
@@ -263,7 +305,10 @@ const Table: FC<Props> = ({
                             size="small"
                             color={action.color || 'secondary'}
                           >
-                            {Icon ? <Icon sx={{ fontSize: '15px', mr: 0.5 }} />: null} {action.label}
+                            {Icon ? (
+                              <Icon sx={{ fontSize: '15px', mr: 0.5 }} />
+                            ) : null}{' '}
+                            {action.label}
                           </Button>
                         </Box>
                       );
@@ -276,19 +321,58 @@ const Table: FC<Props> = ({
 
           <TableFooter>
             <TableRow sx={{ align: 'center' }}>
-              <TablePagination
-                rowsPerPageOptions={[5, 10, 25, { label: 'All', value: -1 }]}
-                colSpan={headerGroups[0].headers.length + 1}
-                count={data.length}
-                rowsPerPage={pageSize}
-                page={pageIndex}
-                SelectProps={{
-                  native: true,
-                }}
-                onPageChange={handlePageChange}
-                onRowsPerPageChange={onRowsPerPageChange}
-                ActionsComponent={TablePaginationActions}
-              />
+              <div className="pagination">
+                <button onClick={() => gotoPage(1)} disabled={!canPreviousPage}>
+                  {'<<'}
+                </button>{' '}
+                <button
+                  onClick={() => previousPage()}
+                  disabled={!canPreviousPage}
+                >
+                  {'<'}
+                </button>{' '}
+                <button onClick={() => nextPage()} disabled={!canNextPage}>
+                  {'>'}
+                </button>{' '}
+                <button
+                  onClick={() => gotoPage(pageCount)}
+                  disabled={!canNextPage}
+                >
+                  {'>>'}
+                </button>{' '}
+                <span>
+                  Page{' '}
+                  <strong>
+                    {pageIndex} of {pageOptions.length}
+                  </strong>{' '}
+                </span>
+                <span>
+                  | Go to page:{' '}
+                  <input
+                    type="number"
+                    value={pageIndex}
+                    onChange={(e) => {
+                      const page = e.target.value
+                        ? Number(e.target.value)
+                        : 1;
+                      gotoPage(page);
+                    }}
+                    style={{ width: '100px' }}
+                  />
+                </span>{' '}
+                <select
+                  value={pageSize}
+                  onChange={(e) => {
+                    setPageSize(Number(e.target.value));
+                  }}
+                >
+                  {[10, 20, 30, 40, 50].map((pageSize) => (
+                    <option key={pageSize} value={pageSize}>
+                      Show {pageSize}
+                    </option>
+                  ))}
+                </select>
+              </div>
             </TableRow>
           </TableFooter>
         </MuiTable>
@@ -299,7 +383,7 @@ const Table: FC<Props> = ({
 
 Table.propTypes = {
   columns: PropTypes.array.isRequired,
-  data: PropTypes.array.isRequired,
+  //data: PropTypes.array.isRequired,
   actions: PropTypes.array.isRequired,
   skipPageReset: PropTypes.bool,
 };
