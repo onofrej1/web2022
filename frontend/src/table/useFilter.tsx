@@ -64,7 +64,7 @@ const useFilter = (props: any) => {
           })}
         </Menu>
       </Box>
-      <div></div>
+      
       {filters.length > 0 &&
         headerGroups.map((headerGroup: any, index: number) => (
           <Box sx={{ display: 'flex', gap: '10px', justifyContent: 'flex-end' }}  key={index}>
@@ -74,7 +74,7 @@ const useFilter = (props: any) => {
               return (
                 <Box key={column.id}>
                   {FilterComponent}
-                  <IconButton sx={{ padding: '16px' }} onClick={() => removeFilter(column.id)}>
+                  <IconButton sx={{ p: 2 }} onClick={() => removeFilter(column.id)}>
                     <ClearIcon />
                   </IconButton>
                 </Box>

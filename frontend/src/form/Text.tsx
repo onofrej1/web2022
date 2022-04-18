@@ -6,10 +6,11 @@ interface Props extends BaseProps {
   type?: string;
   min?: number;
   max?: number;
+  InputProps?: any;
 }
 
 export const Text: FC<Props> = (props) => {
-  const { name, label, value, variant = 'outlined', fullWidth=true, type = 'text', min, max, placeholder = '', onChange } = props;
+  const { name, label, value, variant = 'outlined', fullWidth=true, type = 'text', min, max, InputProps, placeholder = '', onChange } = props;
   const handleChange = useCallback(
     (e) => {
       onChange(e.target.value);
@@ -17,7 +18,7 @@ export const Text: FC<Props> = (props) => {
     [onChange]
   );
 
-  const InputProps = {
+  const BaseInputProps = {
     inputProps: { 
       min,
       max, 
@@ -34,7 +35,7 @@ export const Text: FC<Props> = (props) => {
       type={type}
       placeholder={placeholder}
       name={name}
-      InputProps={InputProps}
+      InputProps={{...BaseInputProps, ...InputProps}}
       InputLabelProps={InputLabelProps}
       onChange={handleChange}
       size="small"

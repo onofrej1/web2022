@@ -1,7 +1,7 @@
 import React from 'react';
 import { useReducer } from 'react';
 import { useParams } from 'react-router-dom';
-import { Box, Typography } from '@mui/material';
+import { Box, Grid, Typography } from '@mui/material';
 import List from 'admin/List';
 import { Form } from 'admin/Form';
 import resources from 'resources/index';
@@ -53,10 +53,13 @@ export const Resources = () => {
     <div>
       {state.page === 'list' && 
       <>
-        <Box m={2}>
-          <Typography variant="h4" component="div">
-            {config.name} list
-          </Typography>
+        <Box sx={{ display: 'flex', justifyContent: 'space-between'}}>
+          <Box m={2}>
+            <Typography variant="h4" component="div">
+              {config.name} list
+            </Typography>
+          </Box>
+          <Box sx={{ m: 2, mt: 3, width: '200px' }} id="table-search"></Box>
         </Box>
         <List resource={state} dispatch={dispatch} />
       </>}

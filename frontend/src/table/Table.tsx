@@ -1,19 +1,22 @@
 import React, { ChangeEvent, FC, Fragment, useEffect } from 'react';
 
-import Checkbox from '@mui/material/Checkbox';
-import MaUTable from '@mui/material/Table';
+import {
+  Checkbox,
+  Table as MuiTable,
+  TableBody,
+  TableCell,
+  TableFooter,
+  TablePagination,
+  TableHead,
+  TableRow,
+  TableSortLabel,
+  TableContainer,
+} from '@mui/material';
+
 import PropTypes from 'prop-types';
-import TableBody from '@mui/material/TableBody';
-import TableCell from '@mui/material/TableCell';
-import TableContainer from '@mui/material/TableContainer';
-import TableFooter from '@mui/material/TableFooter';
-import TableHead from '@mui/material/TableHead';
-import TablePagination from '@mui/material/TablePagination';
-import TableRow from '@mui/material/TableRow';
-import TableSortLabel from '@mui/material/TableSortLabel';
 import TableToolbar from 'table/TableToolbar';
 import TablePaginationActions from 'table/TablePaginationActions';
-import { makeStyles } from 'tss-react/mui';
+import GlobalFilter from 'table/GlobalFilter';
 
 import {
   useFilters,
@@ -53,6 +56,7 @@ interface Props {
   data: any[]; //todo type
   actions: any[]; // todo type
   skipPageReset?: boolean;
+  toolbar: any;
   filterPosition?: 'table' | 'toolbar';
   filters: string[];
 }
@@ -64,6 +68,7 @@ const Table: FC<Props> = ({
   skipPageReset,
   filterPosition = 'toolbar',
   filters = [],
+  toolbar,
 }) => {
   const {
     getTableProps,
@@ -99,12 +104,18 @@ const Table: FC<Props> = ({
             Filter: () => null,
             Header: ({ getToggleAllRowsSelectedProps }: any) => (
               <div>
-                <IndeterminateCheckbox {...getToggleAllRowsSelectedProps()} sx={{ padding: 0 }} />
+                <IndeterminateCheckbox
+                  {...getToggleAllRowsSelectedProps()}
+                  sx={{ padding: 0 }}
+                />
               </div>
             ),
             Cell: ({ row }: any) => (
               <div>
-                <IndeterminateCheckbox {...row.getToggleRowSelectedProps()} sx={{ padding: 0 }} />
+                <IndeterminateCheckbox
+                  {...row.getToggleRowSelectedProps()}
+                  sx={{ padding: 0 }}
+                />
               </div>
             ),
           },
@@ -115,7 +126,10 @@ const Table: FC<Props> = ({
   );
 
   const rowPadding = '8px';
-  const { renderFilter, removeAllFilters } = useFilter({filterConfig: filters, headerGroups });
+  const { renderFilter, removeAllFilters } = useFilter({
+    filterConfig: filters,
+    headerGroups,
+  });
   useEffect(() => {
     //removeAllFilters();
   }, [data, removeAllFilters]);
@@ -128,27 +142,28 @@ const Table: FC<Props> = ({
     setPageSize(Number(e.target.value));
   };
 
-  const useStyles = makeStyles()({
-    tableFilter: {
-      borderBottom: '1px solid lightgray',
-      lineHeight: '43px !important',
-    },
-  });
-  const { classes } = useStyles();
+  /*{numSelected > 0 ? (
+    <Typography color="inherit" variant="subtitle1">
+      {numSelected} selected
+    </Typography>
+  ) : <span></span>}*/
 
   return (
     <>
-      <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
-        {renderFilter()}
-      </Box>
       <TableContainer>
-        <TableToolbar
-          numSelected={Object.keys(selectedRowIds).length}
+        {/* portal element */}
+        <GlobalFilter
           preGlobalFilteredRows={preGlobalFilteredRows}
-          setGlobalFilter={setGlobalFilter}
           globalFilter={globalFilter}
+          setGlobalFilter={setGlobalFilter}
         />
-        <MaUTable {...getTableProps()}>
+        <TableToolbar
+          slots={{
+            left: toolbar ? toolbar.left() : '',
+            right: renderFilter(),
+          }}
+        />
+        <MuiTable {...getTableProps()}>
           <TableHead>
             {headerGroups.map((headerGroup, index) => (
               <Fragment key={index}>
@@ -179,7 +194,6 @@ const Table: FC<Props> = ({
                 {filterPosition === 'table' && (
                   <TableRow
                     {...headerGroup.getHeaderGroupProps()}
-                    className={classes.tableFilter}
                     key={'filter_' + index}
                   >
                     {headerGroup.headers.map((column) => {
@@ -208,13 +222,14 @@ const Table: FC<Props> = ({
             {page.map((row, index) => {
               prepareRow(row);
               return (
-                <TableRow
-                  {...row.getRowProps()}
-                  key={index}
-                >
+                <TableRow {...row.getRowProps()} key={index}>
                   {row.cells.map((cell, index) => {
                     return (
-                      <TableCell {...cell.getCellProps()} key={index} sx={{ padding: rowPadding }}>
+                      <TableCell
+                        {...cell.getCellProps()}
+                        key={index}
+                        sx={{ padding: rowPadding }}
+                      >
                         {cell.render('Cell')}
                       </TableCell>
                     );
@@ -243,20 +258,14 @@ const Table: FC<Props> = ({
           </TableBody>
 
           <TableFooter>
-            <TableRow>
+            <TableRow sx={{ align: 'center'}}>
               <TablePagination
-                rowsPerPageOptions={[
-                  5,
-                  10,
-                  25,
-                  { label: 'All', value: data.length },
-                ]}
-                colSpan={3}
+                rowsPerPageOptions={[5, 10, 25, { label: 'All', value: -1 }]}
+                colSpan={headerGroups[0].headers.length + 1}
                 count={data.length}
                 rowsPerPage={pageSize}
                 page={pageIndex}
                 SelectProps={{
-                  inputProps: { 'aria-label': 'rows per page' },
                   native: true,
                 }}
                 onPageChange={handlePageChange}
@@ -265,7 +274,7 @@ const Table: FC<Props> = ({
               />
             </TableRow>
           </TableFooter>
-        </MaUTable>
+        </MuiTable>
       </TableContainer>
     </>
   );

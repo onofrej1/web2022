@@ -122,25 +122,27 @@ export default function List(props: any) {
 
   //const [skipPageReset, setSkipPageReset] = React.useState(false);
 
+  const addNewItem = () => (
+    <Box>
+      <Button variant="contained" onClick={addItem} color="primary">
+        Add new {config.name}
+      </Button>
+    </Box>
+  );
+
   if (loading) return <div>loading...</div>;
   if (error) return <div>{error}</div>;
 
   return (
     <div>
-      <Box m={2}>
-        <Button variant="contained" onClick={addItem} color="primary">
-          Add new {config.name}
-        </Button>
-      </Box>
-
       <Table
         columns={columns}
         data={data}
         actions={actions}
         filters={config.filter}
+        toolbar={{ left: addNewItem }}
         //skipPageReset={skipPageReset}
       />
-
     </div>
   );
 }
