@@ -10,6 +10,9 @@ import {
 import settings from 'admin/settings';
 import useFetch from 'use-http';
 import { DefaultFilter, filterGreaterThan, RangeFilter, SelectFilter, SliderFilter } from 'table/filters';
+import AddIcon from '@mui/icons-material/Add';
+import EditIcon from '@mui/icons-material/Edit';
+import DeleteIcon from '@mui/icons-material/Delete';
 
 const configKeys: any = {
   header: 'Header',
@@ -113,10 +116,12 @@ export default function List(props: any) {
       label: 'Edit',
       color: 'primary',
       action: editItem,
+      icon: EditIcon,
     },
     {
       label: 'Delete',
       action: () => null,
+      icon: DeleteIcon,
     }
   ];
 
@@ -124,8 +129,8 @@ export default function List(props: any) {
 
   const addNewItem = () => (
     <Box ml={2} mb={2}>
-      <Button variant="contained" onClick={addItem} color="primary">
-        Add new {config.name}
+      <Button size="small" variant="contained" onClick={addItem} color="primary">
+        <AddIcon sx={{ fontSize: '17px'}} /> Add new {config.name}
       </Button>
     </Box>
   );

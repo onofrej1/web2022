@@ -7,6 +7,9 @@ import settings from './settings';
 import { getValue } from './utils';
 import { Box } from '@mui/material';
 import { Field } from '../resources/resources.types';
+import SaveIcon from '@mui/icons-material/Save';
+import CancelIcon from '@mui/icons-material/Cancel';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 
 interface Props {
   resource: any;
@@ -96,19 +99,19 @@ export const Form: FC<Props> = (props) => {
     {
       label: 'Cancel',
       color: 'secondary',
-      icon: 'cancel',
+      icon: CancelIcon,
       action: () => dispatch({ type: 'showList' }),
     },
     {
       label: 'Save',
-      icon: 'save',
+      icon: SaveIcon,
       color: 'primary',
       action: saveData,
     },
     {
       label: 'Save & close',
-      icon: 'save',
-      color: 'secondary',
+      icon: CheckCircleIcon,
+      color: 'success',
       action: async (data: any) => {
         await saveData(data);
         dispatch({ type: 'showList' });

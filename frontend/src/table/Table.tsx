@@ -149,7 +149,9 @@ const Table: FC<Props> = ({
       {renderFilter()}
       <Box sx={{ display: 'flex', padding: 0.8 }}>
         <GetAppIcon color="primary" />
-        <Typography component="span" color="primary">EXPORT</Typography>
+        <Typography component="span" color="primary">
+          EXPORT
+        </Typography>
       </Box>
     </Box>
   );
@@ -250,19 +252,22 @@ const Table: FC<Props> = ({
                     key={'action' + index}
                     sx={{ whiteSpace: 'nowrap', padding: rowPadding }}
                   >
-                    {actions.map((action: any, index) => (
-                      <Box pr={1} key={index} sx={{ display: 'inline' }}>
-                        <Button
-                          key="cancel"
-                          onClick={(e) => action.action(row, e)}
-                          variant="contained"
-                          size="small"
-                          color={action.color || 'secondary'}
-                        >
-                          {action.label}
-                        </Button>
-                      </Box>
-                    ))}
+                    {actions.map((action: any, index) => {
+                      const Icon = action.icon;
+                      return (
+                        <Box pr={1} key={index} sx={{ display: 'inline' }}>
+                          <Button
+                            key="cancel"
+                            onClick={(e) => action.action(row, e)}
+                            variant="contained"
+                            size="small"
+                            color={action.color || 'secondary'}
+                          >
+                            {Icon ? <Icon sx={{ fontSize: '15px', mr: 0.5 }} />: null} {action.label}
+                          </Button>
+                        </Box>
+                      );
+                    })}
                   </TableCell>
                 </TableRow>
               );

@@ -75,7 +75,7 @@ function SelectFilter({
       value={filterValue}
       onChange={setFilter}
       options={options}
-      variant="filled"
+      variant="standard"
       sx={{ width: 'auto', minWidth: '200px' }}
     ></Select>
   );

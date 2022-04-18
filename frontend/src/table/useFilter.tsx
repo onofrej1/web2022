@@ -2,6 +2,7 @@ import React, { Fragment, useState } from 'react';
 import { Box, Button, Grid, IconButton, Menu, MenuItem } from '@mui/material';
 import ClearIcon from '@mui/icons-material/Clear';
 import FilterListIcon from '@mui/icons-material/FilterList';
+import HighlightOffIcon from '@mui/icons-material/HighlightOff';
 
 const useFilter = (props: any) => {
   const { filterConfig, headerGroups } = props;
@@ -48,8 +49,8 @@ const useFilter = (props: any) => {
               return (
                 <Box key={column.id}>
                   {FilterComponent}
-                  <IconButton sx={{ p: 2 }} onClick={() => removeFilter(column.id)}>
-                    <ClearIcon />
+                  <IconButton sx={{ p: 1 }} onClick={() => removeFilter(column.id)}>
+                    <HighlightOffIcon />
                   </IconButton>
                 </Box>
               );

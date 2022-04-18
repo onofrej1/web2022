@@ -7,7 +7,7 @@ import { Box } from '@mui/material';
 const TableToolbar = (props: any) => {
   const { toolbar } = props;
   return (
-    <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+    <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
       <Box>{toolbar.left}</Box>
       <Box>{toolbar.right}</Box>
     </Box>
