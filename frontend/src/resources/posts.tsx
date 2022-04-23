@@ -31,6 +31,7 @@ export default {
     //{ name: 'content', type: 'editor' },
   ],
   list: [
+    { name: 'pk' },
     { name: 'title' },
     { 
       name: 'text', 

@@ -1,4 +1,4 @@
-import React, { ChangeEvent, FC, Fragment, useEffect, useRef } from 'react';
+import React, { ChangeEvent, FC, Fragment, useCallback, useEffect, useRef, useState } from 'react';
 
 import {
   Checkbox,
@@ -6,19 +6,20 @@ import {
   TableBody,
   TableCell,
   TableFooter,
-  TablePagination,
   TableHead,
   TableRow,
   TableSortLabel,
   TableContainer,
   Typography,
+  IconButton,
 } from '@mui/material';
 
 import PropTypes from 'prop-types';
 import TableToolbar from 'table/TableToolbar';
-import TablePaginationActions from 'table/TablePaginationActions';
 import GlobalFilter from 'table/GlobalFilter';
 import GetAppIcon from '@mui/icons-material/GetApp';
+import LastPageIcon from '@mui/icons-material/LastPage';
+import FirstPageIcon from '@mui/icons-material/FirstPage';
 
 import {
   useFilters,
@@ -30,7 +31,8 @@ import {
 } from 'react-table';
 import { Box, Button } from '@mui/material';
 import { useFilter } from './useFilter';
-import { useTablePagination } from './useTablePagination';
+import useFetch from 'use-http';
+import { KeyboardArrowLeft, KeyboardArrowRight } from '@mui/icons-material';
 
 const IndeterminateCheckbox = React.forwardRef<HTMLInputElement, Props>(
   (props: any, ref) => {
@@ -56,36 +58,76 @@ IndeterminateCheckbox.displayName = 'IndeterminateCheckboxDisplayName';
 
 interface Props {
   columns: any[]; // todo type
-  data: any; //todo type
+  data?: any; //todo type
   actions: any[]; // todo type
+  fetchUrl?: string;
   skipPageReset?: boolean;
   toolbar: any;
   filterPosition?: 'table' | 'toolbar';
   filters: string[];
   //page: number;
   //setPage: any;
-  pagination: any;
+  //pagination: any;
 }
+
+const queryString = (params: any) => Object.keys(params).map(key => key + '=' + params[key]).join('&');
 
 const Table: FC<Props> = ({
   columns,
-  data,
+  fetchUrl,
   actions,
   skipPageReset,
-  filterPosition = 'toolbar',
-  filters = [],
+  filterPosition = 'table',
+  filters: filtersConfig = [],
   toolbar,
-  pagination: { page: queryPageIndex, setPage, pageSize: queryPageSize },
 }) => {
-  console.log(data);
-  /*const {
-    //queryPageIndex,
-    //queryPageSize,
-    //dispatch,
-    PAGE_CHANGED,
-    PAGE_SIZE_CHANGED,
-    TOTAL_COUNT_CHANGED,
-  } = useTablePagination();*/
+  //const PAGE_NO = 0;
+  const [queryPage, setQueryPage] = useState(0);
+  const [queryPageSize, setQueryPageSize] = useState(4);
+  const [totalPages, setTotalPages] = useState<number | undefined>(1);
+  const [tableData, setTableData] = useState([]);
+
+  //const [filtersChanged, setFiltersChanged] = useState(false);
+  const resetPage = useRef(false);
+
+  //const url = `${fetchUrl}?page=${queryPage + 1}&page_size=${queryPageSize}`;
+  //const { data = [], cache, loading, error } = useFetch(url, [url]);
+
+  const { cache, loading, error, get } = useFetch(fetchUrl);
+
+  const fetchData = useCallback(
+    async (pageNo, recordsPerPage, search = '', filters) => {
+      const filtersParam = filters.reduce((query: string, f: { id: string, value: string}) => {
+        //queryString(filters)
+        query += `&${f.id}=${f.value}`;
+        return query;
+      }, '');
+      const doReset = resetPage.current === true;
+      if (doReset) {
+        pageNo = 1;
+      }
+      const url = `?page=${pageNo}&page_size=${recordsPerPage}&search=${search}${filtersParam}`;
+      //await new Promise(r => setTimeout(r, 3000));
+      const data = await get(url);
+      const pages = data.count && data.count > 0
+        ? Math.ceil(data.count / recordsPerPage)
+        : undefined;
+
+      
+      setTableData(data.results);
+      setTotalPages(pages);
+      if (doReset) {
+        console.log('go to page 1');
+        setQueryPage(0);
+        //setPage(0);
+        //gotoPage(0);
+      }
+      
+      resetPage.current = false;
+
+      //setFiltersChanged(false);
+    }, []);
+
   const {
     getTableProps,
     headerGroups,
@@ -102,17 +144,19 @@ const Table: FC<Props> = ({
     setPageSize,
     preGlobalFilteredRows,
     setGlobalFilter,
-    state: { pageIndex, pageSize, /*selectedRowIds,*/ globalFilter },
+    state: { pageIndex, pageSize, filters, /*selectedRowIds,*/ globalFilter },
   } = useTable(
     {
       columns,
-      data: data && data.results ? data.results : [],
+      data: tableData,
       initialState: {
-        pageIndex: queryPageIndex,
+        pageIndex: queryPage,
         pageSize: queryPageSize,
       },
       manualPagination: true,
-      pageCount: data.count && data.count > 0 ? Math.ceil(data.count / queryPageSize) : undefined,
+      manualGlobalFilter: true,
+      manualFilters: true,
+      pageCount: totalPages,
       autoResetPage: !skipPageReset,
       // anything we put into these options will automatically be available on the instance. That way we can call this function from our cell renderer!
       //updateMyData,
@@ -153,38 +197,49 @@ const Table: FC<Props> = ({
       });
     }
   );
-  console.log(pageSize);
+
+  useEffect(() => {
+    cache.clear();
+  //eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pageIndex, pageSize, filters]);
+
+  // todo better check
+  //const filtersHasChanged = pageIndex === queryPage && pageSize === queryPageSize;
+  //const filtersHasChanged = false;
+  console.log(pageIndex);
+  useEffect(() => {
+    fetchData(pageIndex + 1, pageSize, globalFilter, filters);
+  }, [pageIndex, pageSize, globalFilter, fetchData, filters]);
+
+  useEffect(() => {
+    if (pageIndex !== queryPage) {
+      setQueryPage(pageIndex);
+    }
+  }, [pageIndex, queryPage]);
+
+  useEffect(() => {
+    setQueryPageSize(pageSize);
+    //gotoPage(0);
+  }, [pageSize, gotoPage]);
+
+  //useEffect(() => {
+  //  gotoPage(0);
+  //}, [gotoPage, filters]);
+
+  useEffect(() => {
+    return () => {
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const rowPadding = '8px';
   const { renderFilter, removeAllFilters } = useFilter({
-    filterConfig: filters,
+    filterConfig: filtersConfig,
     headerGroups,
   });
-  useEffect(() => {
+  //useEffect(() => {
     //removeAllFilters();
-  }, [data, removeAllFilters]);
-
-  useEffect(() => {
-    setPage(pageIndex);
-  }, [pageIndex, setPage]);
-
-  useEffect(() => {
-    console.log(pageIndex);
-    console.log(pageSize);
-    if (pageIndex !== 1) {
-      console.log('go to page 1');
-      gotoPage(1);
-    }
-  }, [pageSize]);
-
-  /*useEffect(() => {
-    if (data?.count) {
-      dispatch({
-        type: TOTAL_COUNT_CHANGED,
-        payload: data.count,
-      });
-    }
-  }, [TOTAL_COUNT_CHANGED, data.count, dispatch]);*/
+  //}, [data, removeAllFilters]);
 
   const toolbarTopRight = () => (
     <Box sx={{ display: 'flex', gap: 2, mr: 2 }}>
@@ -204,6 +259,9 @@ const Table: FC<Props> = ({
     </Typography>
   ) : <span></span>}*/
 
+  //if (loading) return <div>loading...</div>;
+  if (error) return <div>{error}</div>;
+
   return (
     <>
       <TableContainer>
@@ -219,7 +277,11 @@ const Table: FC<Props> = ({
             right: toolbarTopRight(),
           }}
         />
-        <MuiTable {...getTableProps()}>
+        <MuiTable
+          {...getTableProps()}
+          //defaultFilterMethod={(filter, row) =>
+          //  String(row[filter.id]) === filter.value}
+        >
           <TableHead>
             {headerGroups.map((headerGroup, index) => (
               <Fragment key={index}>
@@ -253,6 +315,12 @@ const Table: FC<Props> = ({
                     key={'filter_' + index}
                   >
                     {headerGroup.headers.map((column) => {
+                      const f = column;
+                      const orig = f.setFilter;
+                      f.setFilter = (props) => {
+                        resetPage.current = true;
+                        orig(props);
+                      };
                       return (
                         <th
                           {...column.getHeaderProps()}
@@ -320,59 +388,50 @@ const Table: FC<Props> = ({
           </TableBody>
 
           <TableFooter>
-            <TableRow sx={{ align: 'center' }}>
-              <div className="pagination">
-                <button onClick={() => gotoPage(1)} disabled={!canPreviousPage}>
-                  {'<<'}
-                </button>{' '}
-                <button
-                  onClick={() => previousPage()}
-                  disabled={!canPreviousPage}
-                >
-                  {'<'}
-                </button>{' '}
-                <button onClick={() => nextPage()} disabled={!canNextPage}>
-                  {'>'}
-                </button>{' '}
-                <button
-                  onClick={() => gotoPage(pageCount)}
-                  disabled={!canNextPage}
-                >
-                  {'>>'}
-                </button>{' '}
-                <span>
-                  Page{' '}
-                  <strong>
-                    {pageIndex} of {pageOptions.length}
-                  </strong>{' '}
-                </span>
-                <span>
-                  | Go to page:{' '}
-                  <input
-                    type="number"
-                    value={pageIndex}
+            <TableRow>
+              <TableCell
+                sx={{ whiteSpace: 'nowrap', padding: 0, textAlign: 'center' }}
+                colSpan={columns.length + 2}
+              >
+                <Box sx={{ flexShrink: 0, ml: 2.5 }}>
+                  <IconButton
+                    onClick={() => gotoPage(0)}
+                    disabled={!canPreviousPage}
+                  >
+                    <FirstPageIcon />
+                  </IconButton>
+                  <IconButton
+                    onClick={previousPage}
+                    disabled={!canPreviousPage}
+                  >
+                    <KeyboardArrowLeft />
+                  </IconButton>
+                  <IconButton onClick={nextPage} disabled={!canNextPage}>
+                    {' '}
+                    <KeyboardArrowRight />
+                  </IconButton>
+                  <IconButton
+                    onClick={() => gotoPage(pageCount - 1)}
+                    disabled={!canNextPage}
+                  >
+                    <LastPageIcon />
+                  </IconButton>
+                  Page: {pageIndex + 1}
+                  Show{' '}
+                  <select
+                    value={pageSize}
                     onChange={(e) => {
-                      const page = e.target.value
-                        ? Number(e.target.value)
-                        : 1;
-                      gotoPage(page);
+                      setPageSize(Number(e.target.value));
                     }}
-                    style={{ width: '100px' }}
-                  />
-                </span>{' '}
-                <select
-                  value={pageSize}
-                  onChange={(e) => {
-                    setPageSize(Number(e.target.value));
-                  }}
-                >
-                  {[10, 20, 30, 40, 50].map((pageSize) => (
-                    <option key={pageSize} value={pageSize}>
-                      Show {pageSize}
-                    </option>
-                  ))}
-                </select>
-              </div>
+                  >
+                    {[4, 8, 12, 40, 50].map((pageSize) => (
+                      <option key={pageSize} value={pageSize}>
+                        {pageSize}
+                      </option>
+                    ))}
+                  </select>
+                </Box>
+              </TableCell>
             </TableRow>
           </TableFooter>
         </MuiTable>

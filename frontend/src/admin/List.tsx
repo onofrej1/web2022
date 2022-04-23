@@ -1,5 +1,5 @@
 
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import resources from 'resources/index';
 import Table from 'table/Table';
 //import makeData from './makeData';
@@ -8,7 +8,6 @@ import {
   Button,
 } from '@mui/material';
 import settings from 'admin/settings';
-import useFetch from 'use-http';
 import { DefaultFilter, filterGreaterThan, RangeFilter, SelectFilter, SliderFilter } from 'table/filters';
 import AddIcon from '@mui/icons-material/Add';
 import EditIcon from '@mui/icons-material/Edit';
@@ -89,21 +88,18 @@ const getTableColumns = (resource: string) => {
 export default function List(props: any) {
   const { resource, dispatch } = props;
   const resourceName = resource.name;
-  const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(7);
-  //const [total, setTotal] = useState(1);
+
   const columns: any = React.useMemo(() => getTableColumns(resourceName), [resourceName]);
   // @ts-ignore
   const config = resources[resourceName];
-  const url = `${settings.baseUrl}/${resourceName}?page=${page}`;
-  const { data = [], cache, loading, error } = useFetch(url, [url]);
+  const featchUrl = `${settings.baseUrl}/${resourceName}`;
 
-  useEffect(() => {
-    return () => {
-      cache.clear();
-    };
+  //useEffect(() => {
+  //  return () => {
+  //    cache.clear();
+  //  };
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [page]);
+  //}, [page]);
 
   const addItem = () => {
     dispatch({ type: 'showForm' });
@@ -137,17 +133,16 @@ export default function List(props: any) {
       </Button>
     </Box>
   );
-  if (loading) return <div>loading...</div>;
-  if (error) return <div>{error}</div>;
 
   return (
     <div>
       <Table
         columns={columns}
-        data={data}
-        pagination={{
-          page, setPage, pageSize, setPageSize
-        }}
+        //data={data}
+        //pagination={{
+        //  page, setPage, pageSize, setPageSize, update
+        //}}
+        fetchUrl={featchUrl}
         actions={actions}
         filters={config.filter}
         toolbar={{ topLeft: addNewItem }}
