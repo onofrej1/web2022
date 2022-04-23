@@ -94,13 +94,6 @@ export default function List(props: any) {
   const config = resources[resourceName];
   const featchUrl = `${settings.baseUrl}/${resourceName}`;
 
-  //useEffect(() => {
-  //  return () => {
-  //    cache.clear();
-  //  };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  //}, [page]);
-
   const addItem = () => {
     dispatch({ type: 'showForm' });
   };
@@ -124,8 +117,6 @@ export default function List(props: any) {
     }
   ];
 
-  //const [skipPageReset, setSkipPageReset] = React.useState(false);
-
   const addNewItem = () => (
     <Box ml={2} mb={2}>
       <Button size="small" variant="contained" onClick={addItem} color="primary">
@@ -139,14 +130,10 @@ export default function List(props: any) {
       <Table
         columns={columns}
         //data={data}
-        //pagination={{
-        //  page, setPage, pageSize, setPageSize, update
-        //}}
         fetchUrl={featchUrl}
         actions={actions}
         filters={config.filter}
         toolbar={{ topLeft: addNewItem }}
-        //skipPageReset={skipPageReset}
       />
     </div>
   );

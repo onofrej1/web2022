@@ -1,4 +1,14 @@
-import React, { ChangeEvent, FC, Fragment, useCallback, useEffect, useRef, useState } from 'react';
+/* eslint-disable no-debugger */
+import React, {
+  ChangeEvent,
+  FC,
+  Fragment,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 
 import {
   Checkbox,
@@ -22,6 +32,7 @@ import LastPageIcon from '@mui/icons-material/LastPage';
 import FirstPageIcon from '@mui/icons-material/FirstPage';
 
 import {
+  useAsyncDebounce,
   useFilters,
   useGlobalFilter,
   usePagination,
@@ -70,7 +81,10 @@ interface Props {
   //pagination: any;
 }
 
-const queryString = (params: any) => Object.keys(params).map(key => key + '=' + params[key]).join('&');
+const queryString = (params: any) =>
+  Object.keys(params)
+    .map((key) => key + '=' + params[key])
+    .join('&');
 
 const Table: FC<Props> = ({
   columns,
@@ -83,11 +97,13 @@ const Table: FC<Props> = ({
 }) => {
   //const PAGE_NO = 0;
   const [queryPage, setQueryPage] = useState(0);
+  const skipPageResetRef = React.useRef(false);
+  //debugger;
   const [queryPageSize, setQueryPageSize] = useState(4);
   const [totalPages, setTotalPages] = useState<number | undefined>(1);
   const [tableData, setTableData] = useState([]);
 
-  //const [filtersChanged, setFiltersChanged] = useState(false);
+  const [filtersChanged, setFiltersChanged] = useState(false);
   const resetPage = useRef(false);
 
   //const url = `${fetchUrl}?page=${queryPage + 1}&page_size=${queryPageSize}`;
@@ -97,37 +113,28 @@ const Table: FC<Props> = ({
 
   const fetchData = useCallback(
     async (pageNo, recordsPerPage, search = '', filters) => {
-      const filtersParam = filters.reduce((query: string, f: { id: string, value: string}) => {
-        //queryString(filters)
-        query += `&${f.id}=${f.value}`;
-        return query;
-      }, '');
-      const doReset = resetPage.current === true;
-      if (doReset) {
-        pageNo = 1;
-      }
+      const filtersParam = filters.reduce(
+        (query: string, f: { id: string; value: string }) => {
+          //queryString(filters)
+          query += `&${f.id}=${f.value}`;
+          return query;
+        },
+        ''
+      );
       const url = `?page=${pageNo}&page_size=${recordsPerPage}&search=${search}${filtersParam}`;
       //await new Promise(r => setTimeout(r, 3000));
       const data = await get(url);
-      const pages = data.count && data.count > 0
-        ? Math.ceil(data.count / recordsPerPage)
-        : undefined;
+      const pages =
+        data.count && data.count > 0
+          ? Math.ceil(data.count / recordsPerPage)
+          : undefined;
 
-      
+      //skipPageResetRef.current = true;
       setTableData(data.results);
       setTotalPages(pages);
-      if (doReset) {
-        console.log('go to page 1');
-        setQueryPage(0);
-        //setPage(0);
-        //gotoPage(0);
-      }
-      
-      resetPage.current = false;
-
-      //setFiltersChanged(false);
-    }, []);
-
+    },
+    []
+  );
   const {
     getTableProps,
     headerGroups,
@@ -157,9 +164,14 @@ const Table: FC<Props> = ({
       manualGlobalFilter: true,
       manualFilters: true,
       pageCount: totalPages,
-      autoResetPage: !skipPageReset,
-      // anything we put into these options will automatically be available on the instance. That way we can call this function from our cell renderer!
-      //updateMyData,
+
+      /*autoResetPage: !skipPageResetRef.current,
+      autoResetExpanded: !skipPageResetRef.current,
+      autoResetGroupBy: !skipPageResetRef.current,
+      autoResetSelectedRows: !skipPageResetRef.current,
+      autoResetSortBy: !skipPageResetRef.current,
+      autoResetFilters: !skipPageResetRef.current,
+      autoResetRowState: !skipPageResetRef.current,*/
       //defaultColumn,
     },
     useFilters,
@@ -200,15 +212,14 @@ const Table: FC<Props> = ({
 
   useEffect(() => {
     cache.clear();
-  //eslint-disable-next-line react-hooks/exhaustive-deps
+    //eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pageIndex, pageSize, filters]);
 
-  // todo better check
-  //const filtersHasChanged = pageIndex === queryPage && pageSize === queryPageSize;
-  //const filtersHasChanged = false;
-  console.log(pageIndex);
+  const onFetchDataDebounced = useAsyncDebounce(fetchData, 100);
+
   useEffect(() => {
-    fetchData(pageIndex + 1, pageSize, globalFilter, filters);
+    onFetchDataDebounced(pageIndex + 1, pageSize, globalFilter, filters);
+    //fetchData(pageIndex + 1, pageSize, globalFilter, filters);
   }, [pageIndex, pageSize, globalFilter, fetchData, filters]);
 
   useEffect(() => {
@@ -219,18 +230,7 @@ const Table: FC<Props> = ({
 
   useEffect(() => {
     setQueryPageSize(pageSize);
-    //gotoPage(0);
   }, [pageSize, gotoPage]);
-
-  //useEffect(() => {
-  //  gotoPage(0);
-  //}, [gotoPage, filters]);
-
-  useEffect(() => {
-    return () => {
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
 
   const rowPadding = '8px';
   const { renderFilter, removeAllFilters } = useFilter({
@@ -238,19 +238,22 @@ const Table: FC<Props> = ({
     headerGroups,
   });
   //useEffect(() => {
-    //removeAllFilters();
+  //removeAllFilters();
   //}, [data, removeAllFilters]);
 
-  const toolbarTopRight = () => (
-    <Box sx={{ display: 'flex', gap: 2, mr: 2 }}>
-      {renderFilter()}
-      <Box sx={{ display: 'flex', padding: 0.8 }}>
-        <GetAppIcon color="primary" />
-        <Typography component="span" color="primary">
-          EXPORT
-        </Typography>
+  const toolbarTopRight = useMemo(
+    () => (
+      <Box sx={{ display: 'flex', gap: 2, mr: 2 }}>
+        {renderFilter()}
+        <Box sx={{ display: 'flex', padding: 0.8 }}>
+          <GetAppIcon color="primary" />
+          <Typography component="span" color="primary">
+            EXPORT
+          </Typography>
+        </Box>
       </Box>
-    </Box>
+    ),
+    [renderFilter]
   );
 
   /*{numSelected > 0 ? (
@@ -258,6 +261,11 @@ const Table: FC<Props> = ({
       {numSelected} selected
     </Typography>
   ) : <span></span>}*/
+
+  React.useEffect(() => {
+    // After the table has updated, always remove the flag
+    //skipPageResetRef.current = false;
+  });
 
   //if (loading) return <div>loading...</div>;
   if (error) return <div>{error}</div>;
@@ -274,14 +282,10 @@ const Table: FC<Props> = ({
         <TableToolbar
           toolbar={{
             left: toolbar ? toolbar.topLeft() : '',
-            right: toolbarTopRight(),
+            right: toolbarTopRight,
           }}
         />
-        <MuiTable
-          {...getTableProps()}
-          //defaultFilterMethod={(filter, row) =>
-          //  String(row[filter.id]) === filter.value}
-        >
+        <MuiTable {...getTableProps()}>
           <TableHead>
             {headerGroups.map((headerGroup, index) => (
               <Fragment key={index}>
@@ -318,8 +322,9 @@ const Table: FC<Props> = ({
                       const f = column;
                       const orig = f.setFilter;
                       f.setFilter = (props) => {
-                        resetPage.current = true;
+                        //gotoPage(0);
                         orig(props);
+                        setQueryPage(0);
                       };
                       return (
                         <th

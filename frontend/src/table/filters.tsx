@@ -1,4 +1,4 @@
-import React, { Fragment, useEffect } from 'react';
+import React, { Fragment, useEffect, useState } from 'react';
 import { useAsyncDebounce } from 'react-table';
 import { Text } from 'form/Text';
 import { Select } from 'form/Select';
@@ -31,20 +31,25 @@ function GlobalFilter({
   );
 }
 
-function DefaultFilter({ column: { filterValue, setFilter, id } }: any) {
+function DefaultFilter({ column: { filterValue, setFilter, id }, ...rest }: any) {
   useEffect(() => {
     return () => {
-      setFilter(undefined);
+      //setFilter(undefined);
     };
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+  //const [value, setValue] = useState(filterValue);
+  //console.log(value);
   return (
     <Text
       id={id}
       label={id}
       value={filterValue}
       variant="filled"
-      onChange={setFilter}
+      onChange={(value: string) => {
+        //setValue(value);
+        setFilter(value);
+      }}
       fullWidth={false}
     />
   );
@@ -55,7 +60,7 @@ function SelectFilter({
 }: any) {
   useEffect(() => {
     return () => {
-      setFilter(undefined);
+      //setFilter(undefined);
     };
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
