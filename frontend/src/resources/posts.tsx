@@ -1,5 +1,6 @@
 export default {
   name: 'Post',
+  name_plural: 'Posts',
   menuIcon: 'saveIcon',
   resource: 'posts',
   filter: [
@@ -7,11 +8,12 @@ export default {
     { name: 'text', type: 'text', label: 'Text' },
   ],
   form: [
-    { name: 'title', type: 'text' },
-    { name: 'views', type: 'text'},
+    { name: 'title', label: 'Title', type: 'text' },
+    { name: 'views', label: 'Views', type: 'text'},
     {
       name: 'author',
       type: 'foreignKey',
+      label: 'Author',
       resource: 'users',
       valueField: 'pk',
       textField: 'last_name',
@@ -23,11 +25,12 @@ export default {
     {
       name: 'tags',
       type: 'many2many',
+      label: 'Tags',
       resource: 'tags',
       valueField: 'pk',
       textField: 'name',
     },
-    { name: 'text', type: 'text' },
+    { name: 'text', label: 'Text', type: 'text' },
     //{ name: 'content', type: 'editor' },
   ],
   list: [
@@ -43,10 +46,10 @@ export default {
       type: 'foreignKey',
       //filter: 'select',
       //show: 'last_name',
-      render: ({ author }: any) => {
-        if (!author) return '';
-        return author.first_name + ' ' + author.last_name;
-      },
+      //render: ({ author }: any) => {
+      //  if (!author) return '';
+      //  return author.first_name + ' ' + author.last_name;
+      //},
     },
     {
       name: 'tags',

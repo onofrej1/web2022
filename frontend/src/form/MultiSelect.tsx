@@ -7,14 +7,21 @@ import {
   ListItemText,
   MenuItem,
   Select,
+  SelectChangeEvent,
 } from '@mui/material';
 import { BaseProps } from './Field';
 
-interface Props extends BaseProps {
-  options: any[];
+interface SelectOption {
+  value: string;
+  text: string;
 }
 
-export const CheckboxSelect: FC<Props> = (props) => {
+interface MultiSelectProps extends Omit<BaseProps, 'value'> {
+  value: string[];
+  options: SelectOption[];
+}
+
+export const MultiSelect: FC<MultiSelectProps> = (props) => {
   const {
     name,
     value = [],
@@ -26,10 +33,11 @@ export const CheckboxSelect: FC<Props> = (props) => {
 
   const isAllSelected = options.length > 0 && value.length === options.length;
 
-  const handleChange = (e: any) => {
+  const handleChange = (e: SelectChangeEvent<string[]>) => {
     const values = e.target.value;
     if (values[values.length - 1] === 'all') {
-      onChange(value.length === options.length ? [] : options.map(o => o.value));
+      const newValue = value.length === options.length ? [] : options.map(o => o.value);
+      onChange(newValue);
       return;
     }
     onChange(values);
@@ -52,7 +60,6 @@ export const CheckboxSelect: FC<Props> = (props) => {
         value={value || []}
         onChange={handleChange}
         renderValue={renderValue}
-        // MenuProps={MenuProps}
       >
         <MenuItem
           value="all"

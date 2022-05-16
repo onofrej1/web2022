@@ -1,30 +1,35 @@
 import React, { useState, useCallback, FC } from 'react';
-import { Button, Box } from '@mui/material';
+import { Button, Card, ButtonProps, Box, CardContent, CardActions, CardHeader, Typography, SxProps } from '@mui/material';
 import { Field } from './Field';
-import { Field as FieldType } from '../resources/resources.types';
+import { FormField } from 'resources/resources.types';
 
-interface FormData {
-  [key: string]: any;
+export interface Data {
+  [key: string]: number | string | string[];
 }
 
-interface Props {
-  fields: FieldType[];
-  actions: any[];
-  data: FormData;
-  handleSubmit?: (
-    data: FormData,
-    e: React.MouseEvent<HTMLButtonElement>
-  ) => void;
+interface FormProps {
+  fields: FormField[];
+  actions: FormAction[];
+  title: string;
+  data: Data;
+  handleSubmit?: (data: Data, e: React.MouseEvent<HTMLButtonElement>) => void;
 }
 
-export const Form: FC<Props> = (props) => {
-  const { fields, actions = [], data: defaultData = {}, handleSubmit } = props;
+export interface FormAction {
+  icon: React.ComponentType;
+  color: ButtonProps['color'];
+  action: (data: Data) => Promise<void>;
+  label: string;
+  sx?: SxProps;
+}
+
+export const Form: FC<FormProps> = (props) => {
+  const { title, fields, actions = [], data: defaultData = {}, handleSubmit } = props;
   const [data, setData] = useState(defaultData);
-  console.log(data);
 
   const updateField = useCallback(
     (name: string) => {
-      return (value: string) => {
+      return (value: any) => {
         setData({
           ...data,
           [name]: value,
@@ -40,54 +45,51 @@ export const Form: FC<Props> = (props) => {
     }
   };
 
+  const formWrapperStyles = { px: 2, maxWidth: '600px', marginX: 'auto', backgroundColor: 'white' };
+
   return (
-    <Box sx={{ p: 2, maxWidth: '600px', marginX: 'auto' }}>
-      <form>
-        {fields.map((field: any) => {
+    <Card sx={formWrapperStyles}>
+      <CardHeader component={Typography} title={title} />
+      <CardContent sx={{ py: 0 }}>
+        {fields.map((field) => {
           const fieldName: string = field.name;
           const value = data[fieldName] || '';
+          const onChange = updateField(fieldName);
 
           return (
             <Box mb={2} key={fieldName}>
-              <Field
-                {...field}
-                value={value}
-                onChange={updateField(fieldName)}
-              />
+              <Field {...field} value={value} type={field.type} onChange={onChange} />
             </Box>
           );
         })}
-        <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: '5px' }}>
-          {actions.length ? (
-            actions.map((action: any, index) => {
-              const Icon = action.icon;
-              console.log(action);
+        {/*<div><code>{JSON.stringify(data, null, 4)}</code></div>*/}
+      </CardContent>
+      <CardActions sx={{ display: 'flex', justifyContent: 'flex-end', m: 1 }}>
+        {actions.length ? (
+          actions.map((action, index) => {
+            const Icon = action.icon;
 
-              return (
-                <Button
-                  key={index}
-                  onClick={(e) => action.action(data, e)}
-                  variant="contained"
-                  color={action.color}
-                  startIcon={<Icon fontSize="small" />}
-                >
-                  {action.label}
-                </Button>
-              );
-            })
-          ) : (
-            <>
-              <Button variant="contained" onClick={submit} color="primary">
-                Save
+            return (
+              <Button
+                key={index}
+                onClick={() => action.action(data)}
+                variant="contained"
+                color={action.color}
+                sx={action.sx}
+                startIcon={<Icon />}
+              >
+                {action.label}
               </Button>
-            </>
-          )}
-        </Box>
-      </form>
-
-      <p>
-        <code>{JSON.stringify(data, null, 4)}</code>
-      </p>
-    </Box>
+            );
+          })
+        ) : (
+          <>
+            <Button variant="contained" onClick={submit} color="primary">
+              Save
+            </Button>
+          </>
+        )}
+      </CardActions>
+    </Card>
   );
 };

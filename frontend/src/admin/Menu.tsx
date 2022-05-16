@@ -1,7 +1,7 @@
 import React from 'react';
 import ContentCut from '@mui/icons-material/ContentCut';
 import { Link } from 'react-router-dom';
-import resources from '../resources/index';
+import { resources } from '../resources/index';
 import SaveIcon from '@mui/icons-material/Save';
 import {
   ListItemIcon,

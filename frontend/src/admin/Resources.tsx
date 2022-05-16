@@ -1,79 +1,92 @@
 import React from 'react';
 import { useReducer } from 'react';
 import { useParams } from 'react-router-dom';
-import { Box, Grid, Typography } from '@mui/material';
+import { Box, Typography } from '@mui/material';
 import List from 'admin/List';
 import { Form } from 'admin/Form';
-import resources from 'resources/index';
+import { resources } from 'resources/index';
 
-const defaultState = {
+type ResourcesState =
+ | { name: string, view: 'list', rowId: null }
+ | { name: string, view: 'form', rowId: string | null | undefined };
+
+const defaultState: ResourcesState = {
   name: 'posts',
-  page: 'list',
+  view: 'list',
   rowId: null,
-  data: null,
 };
 
-export const Resources = () => {
-  const params = useParams();
-  const resource = params.resource;
+type ResourcesAction =
+ | { type: 'setName', name: string }
+ | { type: 'showList' }
+ | { type: 'showForm', rowId?: string | null };
 
-  const [state, dispatch] = useReducer((state: any, action: any) => {
+const Resources = () => {
+  const params = useParams();
+  const resourceName = params.resource || '';
+
+  const [state, dispatch] = useReducer((state: ResourcesState, action: ResourcesAction): ResourcesState => {
     switch (action.type) {
       case 'setName':
         return {
           ...state,
+          rowId: null,
+          view: 'list',
           name: action.name,
         };
       case 'showList':
         return {
           ...state,
-          page: 'list',
+          view: 'list',
+          rowId: null,
         };
       case 'showForm':
         return {
           ...state,
-          page: 'form',
+          view: 'form',
           rowId: action.rowId,
         };
       default:
-        return state;
+        return { ...state };
     }
   }, defaultState);
 
-  if (resource && state.name !== params.resource) {
-    dispatch({ type: 'setName', name: params.resource });
-    if (state.type !== 'list') {
-      dispatch({ type: 'showList' });
-    }
+  if (resourceName && state.name !== resourceName) {
+    dispatch({ type: 'setName', name: resourceName });
   }
-  // @ts-ignore
-  const config = resources[resource];
+  const config = resources.find(r => r.resource === resourceName);
+  if (!config) {
+    throw 'Missing resource configuration.';
+  }
+
+  const tableSearchStyles = { m: 2, mt: 3, width: '300px' };
+  const listWrapperStyles = { display: 'flex', justifyContent: 'space-between'};
 
   return (
     <div>
-      {state.page === 'list' && 
+      <div id="confirmDialog" style={{ zIndex: 999 }}></div>
+
+      {state.view === 'list' &&
       <>
-        <Box sx={{ display: 'flex', justifyContent: 'space-between'}}>
+        <Box sx={listWrapperStyles}>
           <Box m={2}>
             <Typography variant="h4" component="div">
               {config.name} list
             </Typography>
           </Box>
-          <Box sx={{ m: 2, mt: 3, width: '300px' }} id="table-search"></Box>
+          <Box sx={tableSearchStyles} id="table-search"></Box>
         </Box>
         <List resource={state} dispatch={dispatch} />
       </>}
-      {state.page === 'form' && 
+      {state.view === 'form' &&
         <>
-          <Box m={2}>
-            <Typography variant="h4" component="div">
-              {state.action === 'add' ? 'Add new' : 'Edit'}{' '}
-              {config.name}
-            </Typography>
-          </Box>
           <Form resource={state} dispatch={dispatch} />
         </>
       }
     </div>
   );
 };
+
+export { Resources };
+export type { ResourcesState, ResourcesAction };
+

@@ -1,37 +1,20 @@
-/* eslint-disable no-debugger */
-import React, {
-  ChangeEvent,
-  FC,
-  Fragment,
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from 'react';
+import React, { FC, Fragment, useCallback, useEffect, useState } from 'react';
 
 import {
-  Checkbox,
   Table as MuiTable,
   TableBody,
   TableCell,
   TableFooter,
   TableHead,
   TableRow,
-  TableSortLabel,
   TableContainer,
   Typography,
-  IconButton,
+  ButtonProps,
 } from '@mui/material';
-
-import PropTypes from 'prop-types';
-import TableToolbar from 'table/TableToolbar';
-import GlobalFilter from 'table/GlobalFilter';
+import AddIcon from '@mui/icons-material/Add';
 import GetAppIcon from '@mui/icons-material/GetApp';
-import LastPageIcon from '@mui/icons-material/LastPage';
-import FirstPageIcon from '@mui/icons-material/FirstPage';
-
 import {
+  Column,
   useAsyncDebounce,
   useFilters,
   useGlobalFilter,
@@ -40,107 +23,98 @@ import {
   useSortBy,
   useTable,
 } from 'react-table';
-import { Box, Button } from '@mui/material';
-import { useFilter } from './useFilter';
+import { Box, Button, CircularProgress } from '@mui/material';
+import { useToolbarFilter } from './useToolbarFilter';
 import useFetch from 'use-http';
-import { KeyboardArrowLeft, KeyboardArrowRight } from '@mui/icons-material';
+import { DataFilter } from 'resources/resources.types';
+import { GlobalFilter } from './filters';
+import { BulkActions } from './BulkActions';
+import { Pagination } from './Pagination';
+import { RowSelection } from './Hooks';
+import { TableHeader } from './TableHeader';
 
-const IndeterminateCheckbox = React.forwardRef<HTMLInputElement, Props>(
-  (props: any, ref) => {
-    // eslint-disable-next-line react/prop-types
-    const { indeterminate, ...rest } = props;
-    const defaultRef = React.useRef();
-    const resolvedRef = ref || defaultRef;
-
-    React.useEffect(() => {
-      if (typeof resolvedRef === 'object' && resolvedRef.current) {
-        resolvedRef.current.indeterminate = indeterminate;
-      }
-    }, [resolvedRef, indeterminate]);
-
-    return (
-      <>
-        <Checkbox ref={resolvedRef} {...rest} />
-      </>
-    );
-  }
-);
-IndeterminateCheckbox.displayName = 'IndeterminateCheckboxDisplayName';
-
-interface Props {
-  columns: any[]; // todo type
-  data?: any; //todo type
-  actions: any[]; // todo type
-  fetchUrl?: string;
-  skipPageReset?: boolean;
-  toolbar: any;
-  filterPosition?: 'table' | 'toolbar';
-  filters: string[];
-  //page: number;
-  //setPage: any;
-  //pagination: any;
+export interface TableAction {
+  label: string;
+  icon: React.ComponentType;
+  color: ButtonProps['color'];
+  action: (data: any) => void;
+  type?: 'edit' | 'delete' | 'info';
 }
 
-const queryString = (params: any) =>
-  Object.keys(params)
-    .map((key) => key + '=' + params[key])
-    .join('&');
+export interface TableBulkAction {
+  label: string;
+  action: (data: any) => void;
+  type?: 'edit' | 'delete' | 'info';
+}
 
-const Table: FC<Props> = ({
+const filterTypeQuery: Record<string, string> = {
+  text: '__like',
+  select: '',
+};
+const toolbarWrapperStyles = { display: 'flex', flexDirection: 'column', alignItems: 'end' };
+
+interface TableProps {
+  fetchUrl?: string;
+  columns: Column[];
+  actions: TableAction[];
+  bulkActions: TableBulkAction[];
+  refreshToken: string | null;
+  filterPosition?: 'table' | 'toolbar';
+  filters: DataFilter[];
+  handleAddItem: () => void;
+}
+
+const rowPadding = '8px';
+const toolbarActionWrapperStyles = { display: 'flex', gap: 2, mr: 4 };
+const tableCellStyles = { whiteSpace: 'nowrap', padding: 0, textAlign: 'center' };
+
+const Table: FC<TableProps> = ({
   columns,
   fetchUrl,
   actions,
-  skipPageReset,
-  filterPosition = 'table',
-  filters: filtersConfig = [],
-  toolbar,
+  refreshToken,
+  bulkActions,
+  filterPosition = 'toolbar',
+  filters: resourceFilters = [],
+  handleAddItem,
 }) => {
-  //const PAGE_NO = 0;
-  const [queryPage, setQueryPage] = useState(0);
-  const skipPageResetRef = React.useRef(false);
-  //debugger;
   const [queryPageSize, setQueryPageSize] = useState(4);
-  const [totalPages, setTotalPages] = useState<number | undefined>(1);
-  const [tableData, setTableData] = useState([]);
+  const [totalRows, setTotalRows] = useState(0);
+  const [totalPages, setTotalPages] = useState(1);
+  const [tableData, setTableData] = useState<any[]>([]);
 
-  const [filtersChanged, setFiltersChanged] = useState(false);
-  const resetPage = useRef(false);
-
-  //const url = `${fetchUrl}?page=${queryPage + 1}&page_size=${queryPageSize}`;
-  //const { data = [], cache, loading, error } = useFetch(url, [url]);
-
-  const { cache, loading, error, get } = useFetch(fetchUrl);
+  const { cache, error, get, loading } = useFetch(fetchUrl);
 
   const fetchData = useCallback(
-    async (pageNo, recordsPerPage, search = '', filters) => {
-      const filtersParam = filters.reduce(
-        (query: string, f: { id: string; value: string }) => {
-          //queryString(filters)
-          query += `&${f.id}=${f.value}`;
-          return query;
-        },
-        ''
-      );
-      const url = `?page=${pageNo}&page_size=${recordsPerPage}&search=${search}${filtersParam}`;
-      //await new Promise(r => setTimeout(r, 3000));
+    async (pageNo, recordsPerPage, search, filters, gotoPage) => {
+      const filtersParam = filters.reduce((query: string, field: { id: string; value: string }) => {
+        const resourceFilter = resourceFilters.find((f) => f.name === field.id);
+        if (!resourceFilter) {
+          throw 'Filter not found';
+        }
+        const queryOperator = filterTypeQuery[resourceFilter.type] as string;
+        query += `&${field.id}${queryOperator}=${field.value}`;
+        return query;
+      }, '');
+      const searchParam = search && search.length ? `&search=${search}` : '';
+      const url = `?page=${pageNo}&take=${recordsPerPage}${filtersParam}${searchParam}`;
       const data = await get(url);
-      const pages =
-        data.count && data.count > 0
-          ? Math.ceil(data.count / recordsPerPage)
-          : undefined;
+      const pages = data.count && data.count > 0 ? Math.ceil(data.count / recordsPerPage) : 1;
 
-      //skipPageResetRef.current = true;
       setTableData(data.results);
+      setTotalRows(data.count);
       setTotalPages(pages);
+      if (pageNo + 1 > pages) {
+        gotoPage(pages - 1);
+      }
     },
-    []
+    [get, resourceFilters]
   );
   const {
     getTableProps,
     headerGroups,
     prepareRow,
-    page: pageData,
-    //page,
+    page,
     canPreviousPage,
     canNextPage,
     pageOptions,
@@ -149,102 +123,63 @@ const Table: FC<Props> = ({
     nextPage,
     previousPage,
     setPageSize,
-    preGlobalFilteredRows,
+    selectedFlatRows,
     setGlobalFilter,
-    state: { pageIndex, pageSize, filters, /*selectedRowIds,*/ globalFilter },
+    state: { pageIndex, pageSize, filters, globalFilter },
   } = useTable(
     {
       columns,
       data: tableData,
       initialState: {
-        pageIndex: queryPage,
+        pageIndex: 0,
         pageSize: queryPageSize,
       },
       manualPagination: true,
       manualGlobalFilter: true,
       manualFilters: true,
       pageCount: totalPages,
-
-      /*autoResetPage: !skipPageResetRef.current,
-      autoResetExpanded: !skipPageResetRef.current,
-      autoResetGroupBy: !skipPageResetRef.current,
-      autoResetSelectedRows: !skipPageResetRef.current,
-      autoResetSortBy: !skipPageResetRef.current,
-      autoResetFilters: !skipPageResetRef.current,
-      autoResetRowState: !skipPageResetRef.current,*/
-      //defaultColumn,
+      autoResetSortBy: false,
+      autoResetExpanded: false,
+      autoResetPage: false
     },
     useFilters,
     useGlobalFilter,
     useSortBy,
     usePagination,
     useRowSelect,
-    (hooks) => {
-      hooks.allColumns.push((columns) => {
-        // works only for server side data
-        return [
-          {
-            id: 'selection',
-            disableFilters: true,
-            Filter: () => null,
-            Header: ({ getToggleAllRowsSelectedProps }: any) => (
-              <div>
-                <IndeterminateCheckbox
-                  {...getToggleAllRowsSelectedProps()}
-                  sx={{ padding: 0 }}
-                />
-              </div>
-            ),
-            Cell: ({ row }: any) => (
-              <div>
-                <IndeterminateCheckbox
-                  {...row.getToggleRowSelectedProps()}
-                  sx={{ padding: 0 }}
-                />
-              </div>
-            ),
-          },
-          ...columns,
-        ];
-      });
-    }
+    (hooks) => RowSelection(hooks),
   );
 
   useEffect(() => {
     cache.clear();
-    //eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [pageIndex, pageSize, filters]);
+  }, [pageIndex, refreshToken, pageSize, filters, cache]);
 
-  const onFetchDataDebounced = useAsyncDebounce(fetchData, 100);
-
-  useEffect(() => {
-    onFetchDataDebounced(pageIndex + 1, pageSize, globalFilter, filters);
-    //fetchData(pageIndex + 1, pageSize, globalFilter, filters);
-  }, [pageIndex, pageSize, globalFilter, fetchData, filters]);
+  const onFetchDataDebounced = useAsyncDebounce(fetchData, 200);
 
   useEffect(() => {
-    if (pageIndex !== queryPage) {
-      setQueryPage(pageIndex);
-    }
-  }, [pageIndex, queryPage]);
+    onFetchDataDebounced(pageIndex, pageSize, globalFilter, filters, gotoPage);
+  }, [pageIndex, refreshToken, pageSize, globalFilter, filters, onFetchDataDebounced, gotoPage]);
 
   useEffect(() => {
     setQueryPageSize(pageSize);
   }, [pageSize, gotoPage]);
 
-  const rowPadding = '8px';
-  const { renderFilter, removeAllFilters } = useFilter({
-    filterConfig: filtersConfig,
+  const { renderFilterMenu, renderFilterItems, hasFilters } = useToolbarFilter({
+    dataFilters: resourceFilters,
     headerGroups,
+    gotoPage,
+    disabled: !!globalFilter,
   });
-  //useEffect(() => {
-  //removeAllFilters();
-  //}, [data, removeAllFilters]);
 
-  const toolbarTopRight = useMemo(
-    () => (
-      <Box sx={{ display: 'flex', gap: 2, mr: 2 }}>
-        {renderFilter()}
+  const toolbarStyles = {
+    display: 'flex',
+    justifyContent: 'space-between', mb: 1
+  };
+
+  const TableActions = (
+    <Box sx={toolbarWrapperStyles}>
+      <Box sx={toolbarActionWrapperStyles}>
+        {filterPosition === 'toolbar' ? renderFilterMenu() : null}
         <Box sx={{ display: 'flex', padding: 0.8 }}>
           <GetAppIcon color="primary" />
           <Typography component="span" color="primary">
@@ -252,136 +187,89 @@ const Table: FC<Props> = ({
           </Typography>
         </Box>
       </Box>
-    ),
-    [renderFilter]
+      <Box>{!globalFilter && renderFilterItems()}</Box>
+    </Box>
   );
 
-  /*{numSelected > 0 ? (
-    <Typography color="inherit" variant="subtitle1">
-      {numSelected} selected
-    </Typography>
-  ) : <span></span>}*/
+  const bulkActionOptions = bulkActions.map((a) => a.label);
+  bulkActionOptions.unshift('Select action');
 
-  React.useEffect(() => {
-    // After the table has updated, always remove the flag
-    //skipPageResetRef.current = false;
-  });
+  const AddNewItem = (
+    <Box ml={2} mb={2}>
+      <Button size="small" variant="contained" onClick={handleAddItem} color="primary">
+        <AddIcon /> Add item
+      </Button>
+    </Box>
+  );
 
-  //if (loading) return <div>loading...</div>;
-  if (error) return <div>{error}</div>;
+  const BulkActionsToolbar = (
+    <Box ml={2}>
+      <BulkActions
+        options={bulkActionOptions}
+        onChange={async (value: string) => {
+          const bulkAction = bulkActions.find((a) => a.label === value);
+          bulkAction?.action(selectedFlatRows);
+        }}
+      />
+      <Typography color="inherit" variant="subtitle1">
+        {selectedFlatRows.length} items selected
+      </Typography>
+    </Box>
+  );
+
+  if (error) return <>{error}</>;
 
   return (
-    <>
+    <Box>
+      {loading && (
+        <CircularProgress size={40} sx={{ position: 'absolute', left: 'calc(50% - 35px)', top: 'calc(50% + 1px)' }} />
+      )}
       <TableContainer>
         {/* portal element replacing "id='table-search'" element in page layout */}
-        <GlobalFilter
-          preGlobalFilteredRows={preGlobalFilteredRows}
-          globalFilter={globalFilter}
-          setGlobalFilter={setGlobalFilter}
-        />
-        <TableToolbar
-          toolbar={{
-            left: toolbar ? toolbar.topLeft() : '',
-            right: toolbarTopRight,
-          }}
-        />
+        {filters.length === 0 && !hasFilters && (
+          <GlobalFilter globalFilter={globalFilter} setGlobalFilter={setGlobalFilter} totalRows={totalRows} />
+        )}
+        <Box sx={toolbarStyles}>
+          {selectedFlatRows.length === 0 ? AddNewItem : BulkActionsToolbar}
+          {TableActions}
+        </Box>
         <MuiTable {...getTableProps()}>
           <TableHead>
             {headerGroups.map((headerGroup, index) => (
-              <Fragment key={index}>
-                <TableRow
-                  {...headerGroup.getHeaderGroupProps()}
-                  key={'header_' + index}
-                >
-                  {headerGroup.headers.map((column) => (
-                    <TableCell
-                      {...(column.id === 'selection'
-                        ? column.getHeaderProps()
-                        : column.getHeaderProps(column.getSortByToggleProps()))}
-                      key={column.id}
-                      sx={{ padding: rowPadding }}
-                    >
-                      {column.render('Header')}
-                      {column.id !== 'selection' ? (
-                        <TableSortLabel
-                          active={column.isSorted}
-                          direction={column.isSortedDesc ? 'desc' : 'asc'}
-                        />
-                      ) : null}
-                    </TableCell>
-                  ))}
-                  <TableCell sx={{ padding: rowPadding }}>Actions</TableCell>
-                </TableRow>
-
-                {filterPosition === 'table' && (
-                  <TableRow
-                    {...headerGroup.getHeaderGroupProps()}
-                    key={'filter_' + index}
-                  >
-                    {headerGroup.headers.map((column) => {
-                      const f = column;
-                      const orig = f.setFilter;
-                      f.setFilter = (props) => {
-                        //gotoPage(0);
-                        orig(props);
-                        setQueryPage(0);
-                      };
-                      return (
-                        <th
-                          {...column.getHeaderProps()}
-                          key={'filter' + column.id}
-                          align="left"
-                        >
-                          <Box ml={2} mt={1}>
-                            <div>
-                              {column.canFilter
-                                ? column.render('Filter')
-                                : null}
-                            </div>
-                          </Box>
-                        </th>
-                      );
-                    })}
-                  </TableRow>
-                )}
-              </Fragment>
+              <TableHeader
+                headerGroup={headerGroup}
+                key={index}
+                renderFilter={filterPosition === 'table' && !globalFilter}
+                resetPage={() => gotoPage(0)}
+              />
             ))}
           </TableHead>
           <TableBody>
-            {pageData.map((row, index) => {
+            {page.map((row, index) => {
               prepareRow(row);
               return (
                 <TableRow {...row.getRowProps()} key={index}>
                   {row.cells.map((cell, index) => {
                     return (
-                      <TableCell
-                        {...cell.getCellProps()}
-                        key={index}
-                        sx={{ padding: rowPadding }}
-                      >
+                      <TableCell {...cell.getCellProps()} key={index} sx={{ padding: rowPadding }}>
                         {cell.render('Cell')}
                       </TableCell>
                     );
                   })}
-                  <TableCell
-                    key={'action' + index}
-                    sx={{ whiteSpace: 'nowrap', padding: rowPadding }}
-                  >
-                    {actions.map((action: any, index) => {
-                      const Icon = action.icon;
+                  <TableCell key={'action_' + index} sx={{ whiteSpace: 'nowrap', padding: rowPadding }}>
+                    {actions.map((action) => {
+                      const Icon = action.icon as any;
                       return (
-                        <Box pr={1} key={index} sx={{ display: 'inline' }}>
+                        <Box pr={1} key={action.label} sx={{ display: 'inline' }}>
                           <Button
-                            key="cancel"
-                            onClick={(e) => action.action(row, e)}
+                            onClick={async () => {
+                              action.action(row);
+                            }}
                             variant="contained"
                             size="small"
                             color={action.color || 'secondary'}
                           >
-                            {Icon ? (
-                              <Icon sx={{ fontSize: '15px', mr: 0.5 }} />
-                            ) : null}{' '}
-                            {action.label}
+                            <Icon sx={{ fontSize: '15px', mr: 0.5 }} /> {action.label}
                           </Button>
                         </Box>
                       );
@@ -394,62 +282,27 @@ const Table: FC<Props> = ({
 
           <TableFooter>
             <TableRow>
-              <TableCell
-                sx={{ whiteSpace: 'nowrap', padding: 0, textAlign: 'center' }}
-                colSpan={columns.length + 2}
-              >
-                <Box sx={{ flexShrink: 0, ml: 2.5 }}>
-                  <IconButton
-                    onClick={() => gotoPage(0)}
-                    disabled={!canPreviousPage}
-                  >
-                    <FirstPageIcon />
-                  </IconButton>
-                  <IconButton
-                    onClick={previousPage}
-                    disabled={!canPreviousPage}
-                  >
-                    <KeyboardArrowLeft />
-                  </IconButton>
-                  <IconButton onClick={nextPage} disabled={!canNextPage}>
-                    {' '}
-                    <KeyboardArrowRight />
-                  </IconButton>
-                  <IconButton
-                    onClick={() => gotoPage(pageCount - 1)}
-                    disabled={!canNextPage}
-                  >
-                    <LastPageIcon />
-                  </IconButton>
-                  Page: {pageIndex + 1}
-                  Show{' '}
-                  <select
-                    value={pageSize}
-                    onChange={(e) => {
-                      setPageSize(Number(e.target.value));
-                    }}
-                  >
-                    {[4, 8, 12, 40, 50].map((pageSize) => (
-                      <option key={pageSize} value={pageSize}>
-                        {pageSize}
-                      </option>
-                    ))}
-                  </select>
-                </Box>
+              <TableCell sx={tableCellStyles} colSpan={columns.length + 2}>
+                <Pagination
+                  gotoPage={gotoPage}
+                  nextPage={nextPage}
+                  previousPage={previousPage}
+                  canNextPage={canNextPage}
+                  canPreviousPage={canPreviousPage}
+                  pageSize={pageSize}
+                  totalPages={pageOptions.length}
+                  pageCount={pageCount}
+                  pageIndex={pageIndex}
+                  pageInfo={pageOptions}
+                  setPageSize={setPageSize}
+                />
               </TableCell>
             </TableRow>
           </TableFooter>
         </MuiTable>
       </TableContainer>
-    </>
+    </Box>
   );
-};
-
-Table.propTypes = {
-  columns: PropTypes.array.isRequired,
-  //data: PropTypes.array.isRequired,
-  actions: PropTypes.array.isRequired,
-  skipPageReset: PropTypes.bool,
 };
 
 export default Table;

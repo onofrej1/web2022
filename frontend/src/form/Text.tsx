@@ -1,16 +1,17 @@
 import React, { FC, useCallback } from 'react';
 import { BaseProps } from './Field';
-import { TextField } from '@mui/material';
+import { SxProps, TextField } from '@mui/material';
 
 interface Props extends BaseProps {
   type?: string;
   min?: number;
   max?: number;
-  InputProps?: any; // move to baseProps ?
+  sx?: SxProps;
+  InputProps?: any; // Pick<TextFieldProps, 'InputProps'>;
 }
 
 export const Text: FC<Props> = (props) => {
-  const { name, label, value, variant = 'outlined', fullWidth=true, type = 'text', min, max, InputProps, placeholder = '', onChange } = props;
+  const { name, label, value, variant = 'outlined', fullWidth=true, type = 'text', sx, min, max, InputProps, placeholder = '', onChange } = props;
   const handleChange = useCallback(
     (e) => {
       onChange(e.target.value);
@@ -19,9 +20,9 @@ export const Text: FC<Props> = (props) => {
   );
 
   const BaseInputProps = {
-    inputProps: { 
+    inputProps: {
       min,
-      max, 
+      max,
     }
   };
 
@@ -41,6 +42,7 @@ export const Text: FC<Props> = (props) => {
       size="small"
       value={value || ''}
       variant={variant}
+      sx={sx}
       fullWidth={fullWidth}
     />
   );

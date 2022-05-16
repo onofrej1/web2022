@@ -1,32 +1,43 @@
-type Input = {
+import React from 'react';
+
+type Option = {
+  text: string;
+  value: string;
+}
+
+interface FormField {
     name: string,
-    label: string,
     type: string,
+    label: string,
+    options?: Option[],
     resource?: string,
     textField?: string,
     valueField?: string,
 }
 
-type Field = {
+interface TableField {
     name: string,
-    type: string,
-    Render: string,
+    header?: string,
+    type?: string,
+    show?: string,
+    accessor?: (row: any) => React.ReactNode,
+    render?: (row: any) => React.ReactNode,
 }
 
-type Filter = {
-    name: string,
-    type: string,
-    op: string,
-    label?: string,
+interface DataFilter {
+  name: string,
+  type: string,
+  label: string,
 }
 
 type Resource = {
-    title: string;
+    name: string;
+    name_plural: string;
     resource: string;
     menuIcon: string;
-    form: Input[];
-    list: Field[];
-    filter: Filter[];
+    form: FormField[];
+    list: TableField[];
+    filter: DataFilter[];
 }
 
-export type { Resource, Input, Field, Filter };
+export type { Resource, DataFilter, TableField, FormField };

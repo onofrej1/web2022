@@ -1,15 +1,16 @@
 import React, { FC } from 'react';
-import { Form as AdminForm } from '../form/Form';
+import { Data, Form as AdminForm, FormAction } from 'form/Form';
 import { useEffect, useState } from 'react';
-import resources from '../resources/index';
+import { resources } from 'resources/index';
 import useFetch from 'use-http';
 import settings from './settings';
-import { getValue } from './utils';
+import { getValue } from 'utils/utils';
 import { Box } from '@mui/material';
-import { Field } from '../resources/resources.types';
+import { FormField } from 'resources/resources.types';
 import SaveIcon from '@mui/icons-material/Save';
 import CancelIcon from '@mui/icons-material/Cancel';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import { toast } from 'react-toastify';
 
 interface Props {
   resource: any;
@@ -30,13 +31,15 @@ const mapFieldOptions = (field: any, options: any[]) => {
 
 export const Form: FC<Props> = (props) => {
   const { resource, dispatch } = props;
-  const { get, post, patch, loading, error } = useFetch(settings.baseUrl);
-  const [fields, setFields] = useState<Field[]>([]);
+  const { get, post, patch, error } = useFetch(settings.baseUrl);
+  const [fields, setFields] = useState<FormField[]>([]);
   const [data, setData] = useState();
 
-  // @ts-ignore
-  const config = resources[resource.name];
-  const formConfig: any[] = config.form;
+  const config = resources.find(r => r.resource === resource.name);
+  if (!config) {
+    throw 'Missing resource configuration.';
+  }
+  const formConfig = config.form;
 
   useEffect(() => {
     async function getData() {
@@ -48,15 +51,15 @@ export const Form: FC<Props> = (props) => {
       });
       setData(data);
     }
-    
-    async function getOptions() {
+
+    async function setFormFields() {
       for (const field of formConfig) {
         if (
           ['foreignKey', 'many2many'].includes(field.type) &&
           field.resource
         ) {
           const options = await get(`/${field.resource}`);
-          field.options = mapFieldOptions(field, options);
+          field.options = mapFieldOptions(field, options.results);
         }
       }
       setFields(formConfig);
@@ -66,7 +69,7 @@ export const Form: FC<Props> = (props) => {
     } else {
       setData({} as any);
     }
-    getOptions();
+    setFormFields();
   }, [formConfig, get, resource.name, resource.rowId]);
 
   const saveData = async (data: any) => {
@@ -75,16 +78,16 @@ export const Form: FC<Props> = (props) => {
     // set relation fields for django rest framework
     for (const field of formConfig) {
       if (field.type === 'foreignKey') {
-        data[field.name+'_id'] = data[field.name] || null;
-        delete data[field.name];
+      //  data[field.name+'_id'] = data[field.name] || null;
+      //  delete data[field.name];
       }
       if (field.type === 'many2many') {
-        data[field.name+'_idset'] = data[field.name] || [];
-        delete data[field.name];
+        //data[field.name+'_idset'] = data[field.name] || [];
+        //delete data[field.name];
       }
     }
 
-    if (data.pk) {
+    if (data[settings.primaryKey]) {
       const url = `/${resource.name}/${resource.rowId}/`;
       await patch(url, data);
       setData(data);
@@ -93,9 +96,10 @@ export const Form: FC<Props> = (props) => {
       await post(url, data);
       setData(data);
     }
+    error ? toast.error('An error occured.') : toast.success('Changes saved.');
   };
-  
-  const actions = [
+
+  const actions: FormAction[] = [
     {
       label: 'Cancel',
       color: 'secondary',
@@ -111,22 +115,27 @@ export const Form: FC<Props> = (props) => {
     {
       label: 'Save & close',
       icon: CheckCircleIcon,
-      color: 'success',
-      action: async (data: any) => {
+      color: 'primary',
+      sx: { backgroundColor: 'text.primary.dark' },
+      action: async (data: Data) => {
         await saveData(data);
         dispatch({ type: 'showList' });
       },
     }
   ];
 
+
   if (!data) return null;
-  if (error) return <div>{error}</div>;
+  if (error) return <>{error}</>;
+
+  const title = data[settings.primaryKey] ? `Edit ${config.name}` : `Add new ${config.name}`;
 
   return (
     <Box p={2}>
       <AdminForm
         fields={fields}
         actions={actions}
+        title={title}
         data={data}
       ></AdminForm>
     </Box>

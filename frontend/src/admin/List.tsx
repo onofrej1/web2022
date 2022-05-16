@@ -1,17 +1,16 @@
-
-import React from 'react';
-import resources from 'resources/index';
-import Table from 'table/Table';
-//import makeData from './makeData';
-import {
-  Box,
-  Button,
-} from '@mui/material';
-import settings from 'admin/settings';
+import React, { Dispatch, useState } from 'react';
+import { resources } from 'resources';
+import Table, { TableAction } from 'table/Table';
+import settings from './settings';
 import { DefaultFilter, filterGreaterThan, RangeFilter, SelectFilter, SliderFilter } from 'table/filters';
-import AddIcon from '@mui/icons-material/Add';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
+import { ResourcesAction, ResourcesState } from './Resources';
+import { TableField, Resource } from 'resources/resources.types';
+import { Column } from 'react-table';
+import useFetch from 'use-http';
+import { toast } from 'react-toastify';
+import { useConfirmDialog } from 'common/useConfirmDialog';
 
 const configKeys: any = {
   header: 'Header',
@@ -19,80 +18,80 @@ const configKeys: any = {
 };
 
 const filters: any = {
-  'text': ['includes', DefaultFilter],
-  'select': ['equals', SelectFilter],
-  'slider': [filterGreaterThan, SliderFilter],
-  'range': ['between', RangeFilter],
+  text: ['includes', DefaultFilter],
+  select: ['equals', SelectFilter],
+  slider: [filterGreaterThan, SliderFilter],
+  range: ['between', RangeFilter],
 };
 
-const mapConfig = (config: any) => {
-  return Object.keys(config).reduce((obj: any, key: any) => {
+type NewTableField = Omit<TableField, 'header' | 'render'> & { Header: any; accessor: any };
+const mapTableFields = (tableField: Partial<TableField>): NewTableField => {
+  return Object.keys(tableField).reduce((obj, key: string) => {
     const newKey: string = configKeys[key] || key;
-    obj[newKey] = config[key];
+    // @ts-ignore
+    obj[newKey] = tableField[key];
     return obj;
-  }, {});
+  }, {} as NewTableField);
 };
 
-const getTableColumns = (resource: string) => {
-  // @ts-ignore
-  const config = resources[resource];
-  const fields = config.list;
+const getTableColumns = (resource: Resource): Column[] | never => {
+  const fields = resource.list;
   if (!fields) {
-    return 'Missing list configuration.';
+    throw 'Missing list configuration.';
   }
-  const columns: any[] = [];
+  const columns: Column[] = [];
 
-  fields.forEach((list: any) => {
-    list = mapConfig(list);
-    const { name, type } = list;
-    const filter = config.filter.find((f: any) => f.name === name);
+  fields.forEach((field) => {
+    const list = mapTableFields(field);
+    const { name, type, Header, show, accessor: fieldAccessor } = list;
+    const filter = resource.filter.find((f: any) => f.name === name);
 
-    let accessor: any = name;
+    let accessor: string | ((data: any) => React.ReactNode) = name;
     if (type === 'many2many') {
+      const showField = show || settings.primaryKey;
       accessor = (data: any) => {
         const values = data[name];
-        return values
-          ? values.map((item: any) => item[list.show]).join(', ')
-          : null;
+        return values ? values.map((item: any) => item[showField]).join(', ') : null;
       };
     }
     if (type === 'foreignKey') {
+      const showField = show || settings.primaryKey;
       accessor = (data: any) => {
-        return data[name] ? data[name][list.show] : null;
+        return data[name] ? data[name][showField] : null;
       };
     }
-    accessor = list.accessor ? list.accessor : accessor;
-    const col: any = {
-      Header: name,
+    accessor = accessor ? accessor : fieldAccessor;
+    const column = {
+      Header: Header || name,
       accessor,
-      //filter: list.filter ? filters[list.filter][0] : null,
-      //Filter: list.filter ? filters[list.filter][1] : () => null,
-      //disableFilters: !list.filter,
       filter: filter ? filters[filter.type][0] : null,
       Filter: filter ? filters[filter.type][1] : () => null,
       disableFilters: !filter,
     };
-    columns.push(col);
+    columns.push(column);
   });
   return columns;
 };
 
-/*interface ListProps {
-  resource: {
-    name: string;
-    title: string;
-  };
-  dispatch: Function;
-}*/
+interface ListProps {
+  resource: ResourcesState;
+  dispatch: Dispatch<ResourcesAction>;
+}
 
-export default function List(props: any) {
+export default function List(props: ListProps) {
   const { resource, dispatch } = props;
-  const resourceName = resource.name;
+  const [ refreshToken, setRefreshToken ] = useState<string | null>(null);
+  const { delete: deleteRow, error, post } = useFetch(settings.baseUrl);
+  const { ConfirmDialog, confirm } = useConfirmDialog();
 
-  const columns: any = React.useMemo(() => getTableColumns(resourceName), [resourceName]);
-  // @ts-ignore
-  const config = resources[resourceName];
-  const featchUrl = `${settings.baseUrl}/${resourceName}`;
+  const resourceName = resource.name;
+  const config = resources.find((r) => r.resource === resourceName);
+  if (!config) {
+    throw 'Missing resource configuration.';
+  }
+
+  const columns = React.useMemo(() => getTableColumns(config), [config]);
+  const fetchUrl = `${settings.baseUrl}/${resourceName}`;
 
   const addItem = () => {
     dispatch({ type: 'showForm' });
@@ -103,7 +102,24 @@ export default function List(props: any) {
     dispatch({ type: 'showForm', rowId });
   };
 
-  const actions = [
+  const deleteItem = async (row: any) => {
+    const rowId = row.original[settings.primaryKey];
+    const url = `/${resource.name}/${rowId}/`;
+    await deleteRow(url);
+    setRefreshToken(new Date().getTime().toString());
+    error ? toast.error('An error occured.') : toast.success('Item deleted.');
+  };
+
+  const deleteItems = async (rows: any[]) => {
+    const url = `/${resource.name}/items/delete`;
+    const data = rows.map((r) => parseInt(r.original.id));
+
+    await post(url, data);
+    setRefreshToken(new Date().getTime().toString());
+    error ? toast.error('An error occured.') : toast.success('Items deleted.');
+  };
+
+  const actions: TableAction[] = [
     {
       label: 'Edit',
       color: 'primary',
@@ -112,36 +128,43 @@ export default function List(props: any) {
     },
     {
       label: 'Delete',
-      action: () => null,
+      color: 'secondary',
+      type: 'delete',
+      action: async(row: any) => {
+        const confirmDelete = await confirm('Delete row ?');
+        if (confirmDelete) {
+          deleteItem(row);
+        }
+      },
       icon: DeleteIcon,
-    }
+    },
   ];
 
-  const addNewItem = () => (
-    <Box ml={2} mb={2}>
-      <Button size="small" variant="contained" onClick={addItem} color="primary">
-        <AddIcon sx={{ fontSize: '17px'}} /> Add new {config.name}
-      </Button>
-    </Box>
-  );
+  const bulkActions: any[] = [
+    {
+      label: 'Delete',
+      type: 'delete',
+      action: async(rows: any) => {
+        const confirmDelete = await confirm('Delete selected rows ?');
+        if (confirmDelete) {
+          deleteItems(rows);
+        }
+      },
+    },
+  ];
 
   return (
     <div>
+      {ConfirmDialog}
       <Table
+        refreshToken={refreshToken}
+        fetchUrl={fetchUrl}
         columns={columns}
-        //data={data}
-        fetchUrl={featchUrl}
         actions={actions}
+        bulkActions={bulkActions}
         filters={config.filter}
-        toolbar={{ topLeft: addNewItem }}
+        handleAddItem={addItem}
       />
     </div>
   );
 }
-
-/*List.propTypes = {
-    resource: PropTypes.shape({
-        name: PropTypes.string,
-        title: PropTypes.string,
-    })
-}*/

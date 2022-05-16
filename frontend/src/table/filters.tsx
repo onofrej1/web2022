@@ -1,56 +1,83 @@
-import React, { Fragment, useEffect, useState } from 'react';
-import { useAsyncDebounce } from 'react-table';
+import React, { Fragment, useState } from 'react';
 import { Text } from 'form/Text';
 import { Select } from 'form/Select';
-// A great library for fuzzy filtering/sorting items
-//import matchSorter from 'match-sorter';
+import { Box, InputAdornment } from '@mui/material';
+import SearchIcon from '@mui/icons-material/Search';
+import ReactDOM from 'react-dom';
 
-function GlobalFilter({
-  preGlobalFilteredRows,
-  globalFilter,
-  setGlobalFilter,
-}: any) {
-  const count = preGlobalFilteredRows.length;
-  const [value, setValue] = React.useState(globalFilter);
-  const onChange = useAsyncDebounce((value) => {
-    setGlobalFilter(value || undefined);
-  }, 200);
+const InputProps= {
+  style: {
+    height: '40px',
+  },
+};
 
-  return (
-    <span>
-      Search:{' '}
-      <Text
-        value={value || ''}
-        onChange={(value: string) => {
-          setValue(value);
-          onChange(value);
-        }}
-        placeholder={`${count} records...`}
-      />
-    </span>
-  );
+interface GlobalFilterProps {
+  globalFilter: any;
+  setGlobalFilter: (filterValue: any) => void;
+  totalRows: number;
 }
 
-function DefaultFilter({ column: { filterValue, setFilter, id }, ...rest }: any) {
-  useEffect(() => {
-    return () => {
-      //setFilter(undefined);
-    };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+const GlobalFilter = ({
+  globalFilter,
+  setGlobalFilter,
+  totalRows,
+}: GlobalFilterProps) => {
+  const [element, setElement] = useState();
+
+  // override big top padding for "filled" variant, add bottom padding to icon
+  const sxProps = {
+    minWidth: 200,
+    '& .MuiFilledInput-input': {
+      paddingTop: '14px !important',
+    },
+    '& .MuiInputAdornment-filled': {
+      paddingBottom: '5px !important',
+    },
+  };
+
+  const Filter = (
+    <Box>
+      <Text
+        variant="filled"
+        value={globalFilter || ''}
+        onChange={(value) => {
+          setGlobalFilter(value);
+        }}
+        InputProps={{
+          startAdornment: (
+            <InputAdornment position="start">
+              <SearchIcon />
+            </InputAdornment>
+          )
+        }}
+        placeholder={`${totalRows} records...`}
+        sx={sxProps}
+      />
+    </Box>
+  );
+
+  React.useEffect(() => {
+    setElement(document.getElementById('table-search') as any);
   }, []);
-  //const [value, setValue] = useState(filterValue);
-  //console.log(value);
+
+  if(!element) return null;
+
+  return ReactDOM.createPortal(Filter, element);
+};
+
+function DefaultFilter({ column: { filterValue, setFilter, id }, disabled  }: any) {
   return (
     <Text
       id={id}
-      label={id}
       value={filterValue}
+      placeholder=""
       variant="filled"
-      onChange={(value: string) => {
-        //setValue(value);
+      disabled={disabled}
+      onChange={(value) => {
         setFilter(value);
       }}
       fullWidth={false}
+      InputProps={InputProps}
     />
   );
 }
@@ -58,30 +85,32 @@ function DefaultFilter({ column: { filterValue, setFilter, id }, ...rest }: any)
 function SelectFilter({
   column: { filterValue, setFilter, preFilteredRows, id },
 }: any) {
-  useEffect(() => {
-    return () => {
-      //setFilter(undefined);
-    };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-  
   const options = React.useMemo(() => {
     const values = new Set<any>();
     preFilteredRows.forEach((row: any) => values.add(row.values[id]));
     const data = Array.from(values).map((o) => ({ text: o, value: o }));
-    data.unshift({ text: 'All', value: undefined });
+    data.unshift({ text: 'All', value: null });
     return data;
   }, [id, preFilteredRows]);
+
+  // override top padding for "filled" variant
+  const sxProps = {
+    minWidth: 200,
+    '& .MuiFilledInput-input': {
+      paddingTop: '14px !important',
+    },
+  };
 
   return (
     <Select
       id={id}
-      label={id}
       value={filterValue}
       onChange={setFilter}
       options={options}
       variant="filled"
-      sx={{ width: 'auto', minWidth: '200px' }}
+      fullWidth={false}
+      sx={sxProps}
+      InputProps={InputProps}
     ></Select>
   );
 }
@@ -89,12 +118,6 @@ function SelectFilter({
 function SliderFilter({
   column: { filterValue, setFilter, preFilteredRows, id },
 }: any) {
-  useEffect(() => {
-    return () => {
-      setFilter(undefined);
-    };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
 
   const [min, max] = React.useMemo(() => {
     let min = preFilteredRows.length ? preFilteredRows[0].values[id] : 0;
@@ -114,8 +137,8 @@ function SliderFilter({
         min={min}
         max={max}
         value={filterValue || min}
-        onChange={(value: string) => {
-          setFilter(parseInt(value, 10));
+        onChange={(value) => {
+          setFilter(value);
         }}
       />
       <button onClick={() => setFilter(undefined)}>Off</button>
@@ -126,12 +149,6 @@ function SliderFilter({
 function RangeFilter({
   column: { filterValue = [], preFilteredRows, setFilter, id },
 }: any) {
-  useEffect(() => {
-    return () => {
-      setFilter(undefined);
-    };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
 
   const [min, max] = React.useMemo(() => {
     let min = preFilteredRows.length ? preFilteredRows[0].values[id] : 0;
@@ -168,16 +185,14 @@ function RangeFilter({
             val ? parseInt(val, 10) : undefined,
           ]);
         }}
-        placeholder={`Min (${min})`}
+        placeholder={`Max (${max})`}
       />
     </Fragment>
   );
 }
 
 // Add new filter or override existing filters, use with UseMemo
-const filterTypes = {
-  //fuzzyText: fuzzyTextFilterFn,
-};
+const filterTypes = {};
 
 // Define a custom filter filter function!
 function filterGreaterThan(rows: any[], id: string, filterValue: string) {

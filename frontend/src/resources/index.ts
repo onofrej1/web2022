@@ -1,5 +1,7 @@
 import posts from './posts';
 import users from './users';
 import tags from './tags';
+import { Resource } from './resources.types';
 
-export default { posts, users, tags };
+const resources: Resource[] = [ posts, users, tags ];
+export { resources };

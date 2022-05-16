@@ -1,4 +1,4 @@
 export default {
-  primaryKey: 'pk',
-  baseUrl: 'http://localhost:8000/api',
+  primaryKey: 'id',
+  baseUrl: 'http://localhost:4000/v1/api',
 };
