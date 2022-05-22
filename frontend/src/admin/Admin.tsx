@@ -1,7 +1,7 @@
 import React from 'react';
 
 import AdminContext from 'admin/AdminContext';
-import Router from 'admin/Router';
+import { AdminRouter as Router } from 'admin/Router';
 
 const Admin = (props: any) => {
   const {

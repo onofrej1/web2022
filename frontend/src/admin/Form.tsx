@@ -78,12 +78,12 @@ export const Form: FC<Props> = (props) => {
     // set relation fields for django rest framework
     for (const field of formConfig) {
       if (field.type === 'foreignKey') {
-      //  data[field.name+'_id'] = data[field.name] || null;
-      //  delete data[field.name];
+        data[field.name+'_id'] = data[field.name] || null;
+        delete data[field.name];
       }
       if (field.type === 'many2many') {
-        //data[field.name+'_idset'] = data[field.name] || [];
-        //delete data[field.name];
+        data[field.name+'_idset'] = data[field.name] || [];
+        delete data[field.name];
       }
     }
 

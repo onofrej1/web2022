@@ -97,7 +97,7 @@ const Table: FC<TableProps> = ({
         return query;
       }, '');
       const searchParam = search && search.length ? `&search=${search}` : '';
-      const url = `?page=${pageNo}&take=${recordsPerPage}${filtersParam}${searchParam}`;
+      const url = `?page=${pageNo + 1}&page_size=${recordsPerPage}${filtersParam}${searchParam}`;
       const data = await get(url);
       const pages = data.count && data.count > 0 ? Math.ceil(data.count / recordsPerPage) : 1;
 

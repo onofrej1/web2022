@@ -63,7 +63,7 @@ const Resources = () => {
   const listWrapperStyles = { display: 'flex', justifyContent: 'space-between'};
 
   return (
-    <div>
+    <>
       <div id="confirmDialog" style={{ zIndex: 999 }}></div>
 
       {state.view === 'list' &&
@@ -79,11 +79,9 @@ const Resources = () => {
         <List resource={state} dispatch={dispatch} />
       </>}
       {state.view === 'form' &&
-        <>
           <Form resource={state} dispatch={dispatch} />
-        </>
       }
-    </div>
+    </>
   );
 };
 

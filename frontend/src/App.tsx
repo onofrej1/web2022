@@ -1,4 +1,4 @@
-import Admin from './admin/Admin';
+//import Admin from './admin/Admin';
 import React from 'react';
 import CssBaseline from '@mui/material/CssBaseline';
 import { ThemeProvider } from '@mui/material/styles';
@@ -14,7 +14,7 @@ export default function App() {
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
-      <Admin routes={routes}></Admin>
+      {/* <Admin routes={routes}></Admin>*/}
     </ThemeProvider>
   );
 }
