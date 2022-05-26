@@ -3,8 +3,8 @@ import { AuthProvider } from 'context/auth.context';
 import { ThemeProvider } from '@mui/material/styles';
 import theme from 'theme';
 import { CssBaseline } from '@mui/material';
-import useFetch, { Provider } from 'use-http';
-import { Routes } from 'Routes';
+import { Provider } from 'use-http';
+import { Routes } from 'router/Routes';
 import { useRoutes } from 'react-router-dom';
 import TokenService from 'services/token.service';
 

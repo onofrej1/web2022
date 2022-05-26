@@ -1,13 +1,15 @@
 interface User {
+    access: string;
+    refresh: string;
     username: string;
     email: string;
 }
 
 const getRefreshToken = () => {
-  return getUser().refreshToken;
+  return getUser().refresh;
 };
 const getAccessToken = () => {
-  return getUser().accessToken;
+  return getUser().access;
 };
 const updateAccessToken = (token: string) => {
   const user = getUser();

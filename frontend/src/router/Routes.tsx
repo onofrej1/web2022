@@ -4,6 +4,7 @@ import { Layout } from 'pages/Layout';
 import { Login } from 'pages/Login';
 import React from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
+import { ProtectedRoute } from './ProtectedRoute';
 
 function PublicPage() {
   return <h3>Public</h3>;
@@ -12,15 +13,6 @@ function PublicPage() {
 function ProtectedPage() {
   return <h3>Protected</h3>;
 }
-
-const RequireAuth = ({ children }: { children: JSX.Element }) => {
-  const auth = useAuth();
-  const location = useLocation();
-  if (!auth.user) {
-    return <Navigate to="/login" state={{ from: location }} replace />;
-  }
-  return children;
-};
 
 const MainRoutes = [
   {
@@ -34,9 +26,9 @@ const MainRoutes = [
       {
         path: '/protected',
         element: (
-          <RequireAuth>
+          <ProtectedRoute>
             <ProtectedPage />
-          </RequireAuth>
+          </ProtectedRoute>
         ),
       },
     ],
@@ -48,4 +40,4 @@ const MainRoutes = [
 ];
 
 const Routes = [...MainRoutes, ...routes];
-export { Routes };
+export { Routes, ProtectedRoute };

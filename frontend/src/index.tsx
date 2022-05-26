@@ -3,7 +3,7 @@ import * as React from 'react';
 //import theme from './theme';
 import './main.scss';
 import ReactDOM from 'react-dom';
-import AppNew from 'AppNew';
+//import AppNew from 'AppNew';
 import { BrowserRouter } from 'react-router-dom';
 import App_ from 'App_';
 

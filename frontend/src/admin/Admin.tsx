@@ -1,7 +1,6 @@
 import React from 'react';
 
 import AdminContext from 'admin/AdminContext';
-import { AdminRouter as Router } from 'admin/Router';
 
 const Admin = (props: any) => {
   const {
@@ -9,27 +8,13 @@ const Admin = (props: any) => {
     //authProvider,
     //dataProvider,
     children,
-    routes = [],
-    dashboard,
-    layout,
-    theme,
-    title = 'Admin',
   } = props;
 
   const AdminDataProvider: any = {};
 
   return (
     <AdminContext dataProvider={AdminDataProvider}>
-      <Router
-        routes={routes}
-        dashboard={dashboard}
-        layout={layout}
-        //theme={theme}
-        title={title}
-        //{...props}
-      >
-        {children}
-      </Router>
+      {children}
     </AdminContext>
   );
 };

@@ -14,7 +14,6 @@ const Login = () => {
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-
     const formData = new FormData(event.currentTarget);
     //const username = formData.get('username') as string;
 
@@ -24,6 +23,7 @@ const Login = () => {
     };
 
     const result = await post('/token/', data);
+    console.log(result);
     if (error) {
       console.log(error);
       return;

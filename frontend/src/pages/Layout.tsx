@@ -12,7 +12,7 @@ const Layout = () => {
           <Link to="/protected">Protected Page</Link>
         </li>
         <li>
-          <Link to="/admin/entity/cost_center">Admin Page</Link>
+          <Link to="/admin/entity/posts">Admin Page</Link>
         </li>
       </ul>
 
