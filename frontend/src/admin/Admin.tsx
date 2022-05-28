@@ -4,9 +4,6 @@ import AdminContext from 'admin/AdminContext';
 
 const Admin = (props: any) => {
   const {
-    //appLayout,
-    //authProvider,
-    //dataProvider,
     children,
   } = props;
 

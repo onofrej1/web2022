@@ -24,7 +24,6 @@ const routes = [
     element: <Layout />,
     children: [{ path: 'dashboard', element: <DashboardComponent /> }]
       .concat(resources),
-    //.concat(customRoutes),
   },
 ];
 

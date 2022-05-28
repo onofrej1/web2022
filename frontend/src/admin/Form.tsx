@@ -43,7 +43,7 @@ export const Form: FC<Props> = (props) => {
 
   useEffect(() => {
     async function getData() {
-      const url = `/${resource.name}/${resource.rowId}`;
+      const url = `/${resource.name}/${resource.rowId}/`;
       const data = await get(url);
 
       Object.keys(data).forEach((key: string) => {
@@ -58,18 +58,19 @@ export const Form: FC<Props> = (props) => {
           ['foreignKey', 'many2many'].includes(field.type) &&
           field.resource
         ) {
-          const options = await get(`/${field.resource}`);
+          const options = await get(`/${field.resource}/`);
+          console.log(options);
           field.options = mapFieldOptions(field, options.results);
         }
       }
       setFields(formConfig);
     }
     if (resource.rowId) {
-      getData();
+      getData().then(setFormFields);
     } else {
       setData({} as any);
+      setFormFields();
     }
-    setFormFields();
   }, [formConfig, get, resource.name, resource.rowId]);
 
   const saveData = async (data: any) => {

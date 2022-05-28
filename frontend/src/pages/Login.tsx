@@ -3,6 +3,7 @@ import React from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import useFetch from 'use-http';
 import jwt from 'jwt-decode';
+import AuthService from 'services/auth.service';
 
 const Login = () => {
   const navigate = useNavigate();
@@ -29,7 +30,9 @@ const Login = () => {
       return;
     }
     const user = jwt(result.access);
-    auth.setUser({user, ...result});
+    auth.setUser({user});
+    AuthService.setAccessToken(result.access);
+    AuthService.setRefreshToken(result.refresh);
     navigate(from, { replace: true });
   };
 

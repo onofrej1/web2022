@@ -2,22 +2,22 @@ import React from 'react';
 import { AuthProvider } from 'context/auth.context';
 import { ThemeProvider } from '@mui/material/styles';
 import theme from 'theme';
-import { CssBaseline } from '@mui/material';
 import { Provider } from 'use-http';
 import { Routes } from 'router/Routes';
 import { useRoutes } from 'react-router-dom';
-import TokenService from 'services/token.service';
+import AuthService from 'services/auth.service';
+import { CssBaseline } from '@mui/material';
+import { getRequestOptions } from 'services/http.service';
 
 const App = () => {
-  // we get the user from the localStorage because that's where we will save their account on the login process
-
   const RenderRoutes = useRoutes(Routes);
+  const options = getRequestOptions();
 
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
-      <AuthProvider userData={TokenService.getUser()}>
-        <Provider url="http://localhost:8000/api">
+      <AuthProvider userData={AuthService.getUser()}>
+        <Provider options={options} url="http://localhost:8000/api">
           <h1>Auth Example</h1>
           {RenderRoutes}
         </Provider>
